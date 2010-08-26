@@ -2,7 +2,7 @@ package af;
 
 public class Estado {
 	public String nome;
-	public int tipo; /* 0: INICIAL REJEICAO, 1: INICIAL ACEITACAO, 2: REJEICAO e 3: ACEITACAO */
+	public int tipo; /* 0: INICIAL NAO-FINAL, 1: INICIAL FINAL, 2: NAO-FINAL e 3: FINAL */
 	
 	public Estado(String nome, int tipo) {
 		this.nome = nome;

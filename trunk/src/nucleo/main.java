@@ -1,5 +1,9 @@
 package nucleo;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import af.*;
 
 public class main {
@@ -11,19 +15,19 @@ public class main {
 		AutomatoFinito automato = new AutomatoFinito();
 		
 		try {
-			automato.construir_ARQUIVO_TIPO_01("automato.txt");
+			automato.construir_ARQUIVO_TIPO_01(args[0]);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
 		}
-		
-		if (automato.interpretar("TI,,")) {
-			System.out.println("aceito");
-		} else {
-			System.out.println("nao aceito");
+
+		try {
+			automato.processarArquivoDeEntrada(args[1]);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(1);
 		}
-		
-		System.out.println("OIIII DEBUGGERRR");
+
 		
 		
 	}

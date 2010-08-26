@@ -1,11 +1,15 @@
 package af;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.Timer;
 
 public class AutomatoFinito {
 	public ArrayList<Estado> estados;
@@ -15,6 +19,8 @@ public class AutomatoFinito {
 	 * de um estado.
 	 */
 	public RegraAF<Estado, String, Estado> regras;
+	private String arquivoDeOrigem;
+	private String saidaIndividual;
 	
 	public AutomatoFinito() {
 		estados = new ArrayList<Estado>();
@@ -36,6 +42,7 @@ public class AutomatoFinito {
 	
 	public boolean interpretar(String w) {
 		Estado estadoAtual = null;
+		StringBuffer saida = new StringBuffer();
 		/* Converte a sequencia de simbolos de entrada (todos caracteres, concatenados em uma string)
 		 * para um Array de elementos na mesma ordem, para facilitar a compracacao no algoritimo e evitar casts explicitos
 		 */
@@ -55,49 +62,57 @@ public class AutomatoFinito {
 		/*
 		 * Comeca a leitura da cadeia
 		 */
+		saida.append(imprimeSaida(w,-1,estadoAtual.nome));
 		int contador = 0;
 		for (String s : simbolosDaCadeia) {
 			if (regras.get(estadoAtual, s) != null) {
 				estadoAtual = regras.get(estadoAtual, s);
-				System.out.println("w:\t"+w);
-				System.out.print("  \t");
-				for (int i = 0; i < contador; i++) {
-					System.out.print(" ");
-				}
-				System.out.print("^");
-				System.out.print(estadoAtual.nome);
-				System.out.println();
-				System.out.println();
+				saida.append(imprimeSaida(w,contador,estadoAtual.nome));
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
 				estadoAtual = regras.get(estadoAtual, "(*)");
-				System.out.println("w:\t"+w);
-				System.out.print("  \t");
-				for (int i = 0; i < contador; i++) {
-					System.out.print(" ");
-				}
-				System.out.print("^");
-				System.out.print(estadoAtual.nome);
-				System.out.println();
-				System.out.println();
+				saida.append(imprimeSaida(w,contador,estadoAtual.nome));
 			} else {
+				saida.append("O automato em questao NAO reconhece a cadeia '"+w+"', pois nao existem transicoes validas para a configuracao atual, e a cadeia nao foi totalmente consumida.");
+				saidaIndividual = saida.toString();
 				return false;
 			}
 			contador++;
 		}
 		
-		if (estadoAtual.tipo == 3 || estadoAtual.tipo == 1)
+		if (estadoAtual.tipo == 3 || estadoAtual.tipo == 1) {
+			saida.append("O automato em questao reconhece a cadeia '"+w+"'");
+			saidaIndividual = saida.toString();
 			return true;
-		
+		}
+		saida.append("O automato em questao NAO reconhece a cadeia '"+w+"', pois para em um estado nao-final");
+		saidaIndividual = saida.toString();
 		return false;
 		
 	}
 	
+	private String imprimeSaida(String w, int contador, String nome) {
+		StringBuffer saida = new StringBuffer();
+		saida.append("w:\t"+w+"\n");
+		if (contador == -1) {
+			saida.append("Estado inicial: "+nome+"\n");
+		} else {
+			saida.append("  \t");
+			for (int i = 0; i < contador; i++) {
+				saida.append(" ");
+			}
+			saida.append("^"+nome+"\n\n");
+		}
+		
+		return saida.toString();
+		
+	}
+
 	/**
 	 * controi o automato considerando o arquivo do tipo 01
 	 * ARQUIVO DO TIPO 01: Cada linha contem uma informacao, 
 	 * a palavra ESTADOS inidica que as proximas linha serao estados (cada estado tera um nome e um tipo, separados por um espaco,
-	 * o tipo de um estado vale 0 p/ estado INICIAL c/ REJEICAO, 1 para estado de INICIAL c/ ACEITACAO, 2 para estado de REJEICAO
-	 * e 3 para ACEITACAO), 
+	 * o tipo de um estado vale 0 p/ estado INICIAL NAO-FINAL, 1 para estado de INICIAL FINAL, 2 para estado de NAO-FINAL
+	 * e 3 para FINAL), 
 	 * a palavra SIMBOLOS indica que as proximas linhas serao simbolos
 	 * e por fim a palavra REGRAS indica que as proximas linhas serao regras (um nome de estado, um simbolo e um outro
 	 * nome de estado, separados por espacos).
@@ -107,6 +122,7 @@ public class AutomatoFinito {
 	 * @throws Exception 
 	 */
 	public void construir_ARQUIVO_TIPO_01(String arquivo) throws Exception {
+		this.arquivoDeOrigem = arquivo;
 		String ref = null;
 		String linha = null;
 		
@@ -186,6 +202,57 @@ public class AutomatoFinito {
 				linha = buffer.readLine();
 			}
 			
+			buffer.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
+			e.printStackTrace();
+			System.exit(1);
+		} catch (IOException e) {
+			System.out.println("Nao foi possivel ler do arquivo.");
+			e.printStackTrace();
+			System.exit(1);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(1);
+		}
+		
+	}
+	
+	/**
+	 * processa um arquivo que contem a cada linha uma cadeia para ser interpretada pelo automato.
+	 * ao final gera-se um arquivo de saida com a interpretacao de cada cadeia descrita.
+	 * 
+	 * @throws Exception 
+	 */
+	public void processarArquivoDeEntrada(String arquivo) throws Exception {
+		String linha = null;
+		StringBuffer saida = new StringBuffer();
+		try {
+			FileReader file = new FileReader(arquivo); // read a file
+			BufferedReader buffer = new BufferedReader(file);
+			
+			linha = buffer.readLine();	/* Le  a primeira linha */
+			while(linha != null){
+				saidaIndividual = null;
+				
+				if(this.interpretar(linha)) {
+					saida.append(linha+" VALIDA\n");
+				} else {
+					saida.append(linha+" NAO-VALIDA\n");
+				}
+				
+				/*
+				 * Imprime saidas individuais para cada cadeia, detalhando a execucao, passo a passo
+				 */
+				BufferedWriter out = new BufferedWriter(new FileWriter(arquivoDeOrigem+": "+linha)); 
+				out.write(saidaIndividual); 
+				out.close();
+				
+				linha = buffer.readLine();
+			}
+			BufferedWriter out = new BufferedWriter(new FileWriter("saida de "+arquivoDeOrigem+" para as entradas em "+arquivo)); 
+			out.write(saida.toString()); 
+			out.close();
 			buffer.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
