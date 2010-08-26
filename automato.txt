@@ -1,0 +1,23 @@
+ESTADOS
+A	0
+B	2
+C	2
+D	3
+E	3
+F	2
+SIMBOLOS
+T
+I
+<
+>
+N
+,
+REGRAS
+A	T	B
+B	I	E
+C	>	F
+D	(*)	B
+E	<	C
+E	(*)	B
+F	N	D
+F	(*)	C
