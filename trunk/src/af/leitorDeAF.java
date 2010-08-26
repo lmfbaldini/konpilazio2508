@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
+import javax.sound.midi.SysexMessage;
+
 /**
  * Esta classe realiza a leitura do arquivo e retorna atraves do metodo iniciarLeitura, que recebe como parametro o nome
  * do arquivo, um objeto AutomatoFinito equivalente ao descrito no arquivo de entrada.
@@ -56,7 +58,8 @@ public class leitorDeAF {
 				
 				if (ref == "ESTADOS") {
 					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
-					automatoInterno.estados.add(new Estado(valores.nextToken(), Integer.parseInt(valores.nextToken())));
+					automatoInterno.estados.add(new Estado(valores.nextToken(), 
+												Integer.parseInt(valores.nextToken())));
 					
 				} else if (ref == "SIMBOLOS") {
 					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
@@ -64,7 +67,11 @@ public class leitorDeAF {
 					
 				} else if (ref == "REGRAS") {
 					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
-					automatoInterno.estados.add(new Estado(valores.nextToken(), Integer.parseInt(valores.nextToken().toString())));
+					automatoInterno.regras.put(	new Estado(valores.nextToken(),
+													Integer.parseInt(valores.nextToken())),
+												valores.nextToken(),
+												new Estado(valores.nextToken(),
+													Integer.parseInt(valores.nextToken())));
 						
 				} else {
 					
@@ -78,11 +85,13 @@ public class leitorDeAF {
 			
 			buffer.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Arquivo não encontrado. Coloque-o na mesma pasta do programa.");
 			e.printStackTrace();
+			System.exit(1);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Não foi possivel ler do arquivo.");
 			e.printStackTrace();
+			System.exit(1);
 		}
 		
 		return automatoInterno;
