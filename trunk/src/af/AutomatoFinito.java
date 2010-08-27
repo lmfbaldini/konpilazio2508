@@ -102,7 +102,6 @@ public class AutomatoFinito {
 			}
 			saida.append("^"+nome+"\n\n");
 		}
-		
 		return saida.toString();
 		
 	}
@@ -121,7 +120,7 @@ public class AutomatoFinito {
 	 * @return AF
 	 * @throws Exception 
 	 */
-	public void construir_ARQUIVO_TIPO_01(String arquivo) throws Exception {
+	public void construirAutomato(String arquivo) throws Exception {
 		this.arquivoDeOrigem = arquivo;
 		String ref = null;
 		String linha = null;
@@ -236,9 +235,9 @@ public class AutomatoFinito {
 				saidaIndividual = null;
 				
 				if(this.interpretar(linha)) {
-					saida.append(linha+" VALIDA\n");
+					saida.append(linha+" VALIDA\n\n");
 				} else {
-					saida.append(linha+" NAO-VALIDA\n");
+					saida.append(linha+" NAO-VALIDA\n\n");
 				}
 				
 				/*
@@ -246,13 +245,15 @@ public class AutomatoFinito {
 				 */
 				BufferedWriter out = new BufferedWriter(new FileWriter(arquivoDeOrigem+": "+linha)); 
 				out.write(saidaIndividual); 
+				System.out.println(saidaIndividual);
 				out.close();
 				
 				linha = buffer.readLine();
 			}
-			BufferedWriter out = new BufferedWriter(new FileWriter("saida de "+arquivoDeOrigem+" para as entradas em "+arquivo)); 
-			out.write(saida.toString()); 
-			out.close();
+			BufferedWriter outFinal = new BufferedWriter(new FileWriter("saida de "+arquivoDeOrigem+" para as entradas em "+arquivo)); 
+			outFinal.write(saida.toString()); 
+			System.out.println(saida.toString());
+			outFinal.close();
 			buffer.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
