@@ -16,6 +16,11 @@ import java.util.StringTokenizer;
  * q0: Estado identificado como inicial em ArrayList<Estado> estados
  * F: Estados identificados como finais em ArrayList<Estado> estados
  * 
+ * Este automato pode resolver nao determinismos atravez de um mecanismo que ira trilhar todos os caminhos possiveis
+ * gerados pelos nao determinismos (evitando loops). Caso encontre um caminho que consuma a cadeia e termine em um estado
+ * de aceitacao, ele para e aceita a cadeia. Caso nenhum dos caminhos consuma a cadeia inteira ou termine em um estado de 
+ * rejeicao mesmo que consuma a cadeia, o automato rejeitara a cadeia.
+ * 
  * @author Baldini
  *
  */
@@ -49,6 +54,17 @@ public class AutomatoFinito {
 		this.regras.putAll(af.regras);
 	}
 	
+	/*
+	 * Aceita automatos nao-deterministicos
+	 */
+	public boolean interpretarGeral(String w) {
+		//TODO
+		
+		
+		return false;
+		
+	}
+	
 	public boolean interpretar(String w) {
 		Estado estadoAtual = null;
 		StringBuffer saida = new StringBuffer();
@@ -71,17 +87,17 @@ public class AutomatoFinito {
 		/*
 		 * Comeca a leitura da cadeia
 		 */
-		saida.append(imprimeSaida(w,"",-1,estadoAtual,regras, -1));
+		saida.append(imprimeSaida(w,"",-1,estadoAtual,null, -1));
 		int contador = 0;
 		for (String s : simbolosDaCadeia) {
 			if (regras.get(estadoAtual, s) != null) {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, 0));
-				estadoAtual = regras.get(estadoAtual, s);
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, s).getFirst(), 0));
+				estadoAtual = regras.get(estadoAtual, s).getFirst();
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, 0));
-				estadoAtual = regras.get(estadoAtual, "(*)");
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(*)").getFirst(), 0));
+				estadoAtual = regras.get(estadoAtual, "(*)").getFirst();
 			} else {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, -2));
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,null, -2));
 				saidaIndividual = saida.toString();
 				return false;
 			}
@@ -89,11 +105,11 @@ public class AutomatoFinito {
 		}
 		
 		if (estadoAtual.tipo == 3 || estadoAtual.tipo == 1) {
-			saida.append(imprimeSaida(w,"",-3,estadoAtual,regras, -3));
+			saida.append(imprimeSaida(w,"",-3,estadoAtual,null, -3));
 			saidaIndividual = saida.toString();
 			return true;
 		}
-		saida.append(imprimeSaida(w,"",-4,estadoAtual,regras, -4));
+		saida.append(imprimeSaida(w,"",-4,estadoAtual,null, -4));
 		saidaIndividual = saida.toString();
 		return false;
 		
@@ -115,18 +131,18 @@ public class AutomatoFinito {
 		/*
 		 * Comeca a leitura da cadeia
 		 */
-		saida.append(imprimeSaida(w,"",-1,estadoAtual,regras, -1));
+		saida.append(imprimeSaida(w,"",-1,estadoAtual,null, -1));
 		int contador = 0;
 		String s = null;
 		while ((s = simbolosDaCadeia.nextToken())!= null) {
 			if (regras.get(estadoAtual, s) != null) {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, 0));
-				estadoAtual = regras.get(estadoAtual, s);
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, s).getFirst(), 0));
+				estadoAtual = regras.get(estadoAtual, s).getFirst();
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, 0));
-				estadoAtual = regras.get(estadoAtual, "(*)");
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(*)").getFirst(), 0));
+				estadoAtual = regras.get(estadoAtual, "(*)").getFirst();
 			} else {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, -2));
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,null, -2));
 				saidaIndividual = saida.toString();
 				return false;
 			}
@@ -134,18 +150,18 @@ public class AutomatoFinito {
 		}
 		
 		if (estadoAtual.tipo == 3 || estadoAtual.tipo == 1) {
-			saida.append(imprimeSaida(w,"",-3,estadoAtual,regras, -3));
+			saida.append(imprimeSaida(w,"",-3,estadoAtual,null, -3));
 			saidaIndividual = saida.toString();
 			return true;
 		}
-		saida.append(imprimeSaida(w,"",-4,estadoAtual,regras, -4));
+		saida.append(imprimeSaida(w,"",-4,estadoAtual,null, -4));
 		saidaIndividual = saida.toString();
 		return false;
 		
 	}
 	
 	
-	private String imprimeSaida(String w, String s, int contador, Estado estadoAtual, RegraAF<Estado, String, Estado> regras2, int tipo) {
+	private String imprimeSaida(String w, String s, int contador, Estado estadoAtual, Estado proxEstado, int tipo) {
 		StringBuffer saida = new StringBuffer();
 
 		if (tipo == -1) { //IMPRIME CONFIG INICIAL
@@ -194,13 +210,13 @@ public class AutomatoFinito {
 			saida.append("^"+estadoAtual.nome+"\n");
 			
 			if (regras.get(estadoAtual, s) != null) {
-				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", "+s+")->"+regras.get(estadoAtual, s).nome);
+				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", "+s+")->"+proxEstado.nome);
 				System.out.println();
-				saida.append("Transicao utilizada: ("+estadoAtual.nome+", "+s+")->"+regras.get(estadoAtual, s).nome+"\n\n");
+				saida.append("Transicao utilizada: ("+estadoAtual.nome+", "+s+")->"+proxEstado.nome+"\n\n");
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
-				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", *)->"+regras.get(estadoAtual, "(*)").nome);
+				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", *)->"+proxEstado.nome);
 				System.out.println();
-				saida.append("Transicao utilizada: ("+estadoAtual.nome+", *)->"+regras.get(estadoAtual, "(*)").nome+"\n\n");
+				saida.append("Transicao utilizada: ("+estadoAtual.nome+", *)->"+proxEstado.nome+"\n\n");
 			}
 
 		}
@@ -328,7 +344,7 @@ public class AutomatoFinito {
 	 * 
 	 * @throws Exception 
 	 */
-	public void processarArquivoDeEntrada(String arquivo) throws Exception {
+	public void processarArquivoDeEntrada(String arquivo, boolean verbose) throws Exception {
 		String linha = null;
 		StringBuffer saida = new StringBuffer();
 		try {
@@ -356,15 +372,19 @@ public class AutomatoFinito {
 				/*
 				 * Imprime saidas individuais para cada cadeia, detalhando a execucao, passo a passo
 				 */
-				BufferedWriter out = new BufferedWriter(new FileWriter(arquivoDeOrigem+": "+linha)); 
-				out.write(saidaIndividual); 
-				out.close();
+				if (verbose) {
+					BufferedWriter out = new BufferedWriter(new FileWriter(arquivoDeOrigem+": "+linha)); 
+					out.write(saidaIndividual); 
+					out.close();
+				}
 				
 				linha = buffer.readLine();
 			}
-			BufferedWriter out = new BufferedWriter(new FileWriter("saida de "+arquivoDeOrigem+" para as entradas em "+arquivo)); 
-			out.write(saida.toString()); 
-			out.close();
+			if (verbose) {
+				BufferedWriter out = new BufferedWriter(new FileWriter("saida de "+arquivoDeOrigem+" para as entradas em "+arquivo)); 
+				out.write(saida.toString()); 
+				out.close();
+			}
 			buffer.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
