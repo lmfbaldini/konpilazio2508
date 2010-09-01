@@ -14,6 +14,7 @@ N
 ,
 REGRAS
 A T B
+A T C
 B I E
 C > F
 D (*) B
