@@ -1,0 +1,10 @@
+TI
+TI<>
+TI<N>
+TI,I,I
+T<N,N,N>
+I,I,I<N>
+TI,,I<N>
+TI<NNN>,I,TI
+TI<N>,I<N,N>,I<N,N,N>
+TI,I<N>,I,I<N,N,N>,I<N>

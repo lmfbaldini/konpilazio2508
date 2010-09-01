@@ -1,0 +1,23 @@
+Configuracao inicial:
+w:	TI<>
+Estado: A
+
+Configuracao atual
+w:	TI<>
+  	^A
+Transicao utilizada: (A, T)->B
+
+Configuracao atual
+w:	TI<>
+  	 ^B
+Transicao utilizada: (B, I)->E
+
+Configuracao atual
+w:	TI<>
+  	  ^E
+Transicao utilizada: (E, <)->B
+
+Configuracao atual
+w:	TI<>
+  	   ^B
+Nao existe uma regra para a configuracao atual (B, >)

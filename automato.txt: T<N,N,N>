@@ -1,0 +1,13 @@
+Configuracao inicial:
+w:	T<N,N,N>
+Estado: A
+
+Configuracao atual
+w:	T<N,N,N>
+  	^A
+Transicao utilizada: (A, T)->B
+
+Configuracao atual
+w:	T<N,N,N>
+  	 ^B
+Nao existe uma regra para a configuracao atual (B, <)

@@ -15,7 +15,7 @@ public class main {
 		AutomatoFinito automato = new AutomatoFinito();
 		
 		try {
-			automato.construirAutomato(args[0]);
+			automato.construir(args[0]);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
@@ -27,8 +27,6 @@ public class main {
 			System.out.println(e.getMessage());
 			System.exit(1);
 		}
-		
-		System.out.println("");
 
 		
 		
