@@ -1,0 +1,35 @@
+Configuracao inicial:
+w:	TI,I,I
+Estado: A
+
+Configuracao atual
+w:	TI,I,I
+  	^A
+Transicao utilizada: (A, T)->B
+
+Configuracao atual
+w:	TI,I,I
+  	 ^B
+Transicao utilizada: (B, I)->E
+
+Configuracao atual
+w:	TI,I,I
+  	  ^E
+Transicao utilizada: (E, *)->B
+
+Configuracao atual
+w:	TI,I,I
+  	   ^B
+Transicao utilizada: (B, I)->E
+
+Configuracao atual
+w:	TI,I,I
+  	    ^E
+Transicao utilizada: (E, *)->B
+
+Configuracao atual
+w:	TI,I,I
+  	     ^B
+Transicao utilizada: (B, I)->E
+
+A cadeia foi inteiramente consumida e o estado atual (E) eh FINAL

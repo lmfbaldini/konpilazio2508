@@ -11,6 +11,17 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Timer;
 
+
+/**M = (Q, S, P, q0, F)
+ * Q: ArrayList<Estado> estados
+ * S: ArrayList<Estado> simbolos
+ * P: RegraAF<Estado, String, Estado> regras
+ * q0: Estado identificado como inicial em ArrayList<Estado> estados
+ * F: Estados identificados como finais em ArrayList<Estado> estados
+ * 
+ * @author Baldini
+ *
+ */
 public class AutomatoFinito {
 	public ArrayList<Estado> estados;
 	public ArrayList<String> simbolos;
@@ -26,6 +37,7 @@ public class AutomatoFinito {
 		estados = new ArrayList<Estado>();
 		simbolos = new ArrayList<String>();
 		regras = new RegraAF<Estado, String, Estado>();
+		this.clear();
 	}
 	
 	public void clear() {
@@ -62,17 +74,17 @@ public class AutomatoFinito {
 		/*
 		 * Comeca a leitura da cadeia
 		 */
-		saida.append(imprimeSaida(w,-1,estadoAtual.nome));
+		saida.append(imprimeSaida(w,"",-1,estadoAtual,regras, -1));
 		int contador = 0;
 		for (String s : simbolosDaCadeia) {
 			if (regras.get(estadoAtual, s) != null) {
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, 0));
 				estadoAtual = regras.get(estadoAtual, s);
-				saida.append(imprimeSaida(w,contador,estadoAtual.nome));
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, 0));
 				estadoAtual = regras.get(estadoAtual, "(*)");
-				saida.append(imprimeSaida(w,contador,estadoAtual.nome));
 			} else {
-				saida.append("O automato em questao NAO reconhece a cadeia '"+w+"', pois nao existem transicoes validas para a configuracao atual, e a cadeia nao foi totalmente consumida.");
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, -2));
 				saidaIndividual = saida.toString();
 				return false;
 			}
@@ -80,28 +92,124 @@ public class AutomatoFinito {
 		}
 		
 		if (estadoAtual.tipo == 3 || estadoAtual.tipo == 1) {
-			saida.append("O automato em questao reconhece a cadeia '"+w+"'");
+			saida.append(imprimeSaida(w,"",-3,estadoAtual,regras, -3));
 			saidaIndividual = saida.toString();
 			return true;
 		}
-		saida.append("O automato em questao NAO reconhece a cadeia '"+w+"', pois para em um estado nao-final");
+		saida.append(imprimeSaida(w,"",-4,estadoAtual,regras, -4));
 		saidaIndividual = saida.toString();
 		return false;
 		
 	}
 	
-	private String imprimeSaida(String w, int contador, String nome) {
+	public boolean interpretarCadeiaTratada(String w, String separador) {
+		Estado estadoAtual = null;
 		StringBuffer saida = new StringBuffer();
-		saida.append("w:\t"+w+"\n");
-		if (contador == -1) {
-			saida.append("Estado inicial: "+nome+"\n");
-		} else {
+		/* Tokeniza a string de entrada pelo separador passado como parametro
+		 */
+		StringTokenizer simbolosDaCadeia = new StringTokenizer(w, separador);
+		/*
+		 * Seta o estado inicial
+		 */
+		for (Estado q : estados) {
+			if (q.tipo == 0 || q.tipo == 1)
+				estadoAtual = q;
+		}
+		/*
+		 * Comeca a leitura da cadeia
+		 */
+		saida.append(imprimeSaida(w,"",-1,estadoAtual,regras, -1));
+		int contador = 0;
+		String s = null;
+		while ((s = simbolosDaCadeia.nextToken())!= null) {
+			if (regras.get(estadoAtual, s) != null) {
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, 0));
+				estadoAtual = regras.get(estadoAtual, s);
+			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, 0));
+				estadoAtual = regras.get(estadoAtual, "(*)");
+			} else {
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras, -2));
+				saidaIndividual = saida.toString();
+				return false;
+			}
+			contador++;
+		}
+		
+		if (estadoAtual.tipo == 3 || estadoAtual.tipo == 1) {
+			saida.append(imprimeSaida(w,"",-3,estadoAtual,regras, -3));
+			saidaIndividual = saida.toString();
+			return true;
+		}
+		saida.append(imprimeSaida(w,"",-4,estadoAtual,regras, -4));
+		saidaIndividual = saida.toString();
+		return false;
+		
+	}
+	
+	
+	private String imprimeSaida(String w, String s, int contador, Estado estadoAtual, RegraAF<Estado, String, Estado> regras2, int tipo) {
+		StringBuffer saida = new StringBuffer();
+
+		if (tipo == -1) { //IMPRIME CONFIG INICIAL
+			System.out.println("Configuracao inicial:");
+			saida.append("Configuracao inicial:\n");
+			System.out.println("w:\t"+w);
+			saida.append("w:\t"+w+"\n");
+			System.out.println("Estado: "+estadoAtual.nome+"\n");
+			saida.append("Estado: "+estadoAtual.nome+"\n\n");
+		} else if (tipo == -2) { //IMPRIME SAIDA DE FALHA POR FALTA DE REGRA
+			System.out.println("Configuracao atual:");
+			saida.append("Configuracao atual\n");
+			System.out.println("w:\t"+w);
+			saida.append("w:\t"+w+"\n");
+			System.out.print("  \t");
 			saida.append("  \t");
 			for (int i = 0; i < contador; i++) {
+				System.out.print(" ");
 				saida.append(" ");
 			}
-			saida.append("^"+nome+"\n\n");
+			System.out.println("^"+estadoAtual.nome);
+			saida.append("^"+estadoAtual.nome+"\n");
+			
+			System.out.println("Nao existe uma regra para a configuracao atual ("+estadoAtual.nome+", "+s+")");
+			saida.append("Nao existe uma regra para a configuracao atual ("+estadoAtual.nome+", "+s+")\n");
+		}  else if (tipo == -3) { //IMPRIME SAIDA DE SUCESSO
+			System.out.println("A cadeia foi inteiramente consumida e o estado atual ("+estadoAtual.nome+") eh FINAL");
+			saida.append("A cadeia foi inteiramente consumida e o estado atual ("+estadoAtual.nome+") eh FINAL\n");			
+		
+		}  else if (tipo == -4) { //IMPRIME SAIDA DE FALHA POR ESTADO FINAL NAO-FINAL
+			System.out.println("A cadeia foi inteiramente consumida contudo o estado atual ("+estadoAtual.nome+") eh NAO-FINAL");
+			saida.append("A cadeia foi inteiramente consumida contudo o estado atual ("+estadoAtual.nome+") eh NAO-FINAL\n");	
+			
+		} else {
+			System.out.println("Configuracao atual:");
+			saida.append("Configuracao atual\n");
+			System.out.println("w:\t"+w);
+			saida.append("w:\t"+w+"\n");
+			System.out.print("  \t");
+			saida.append("  \t");
+			for (int i = 0; i < contador; i++) {
+				System.out.print(" ");
+				saida.append(" ");
+			}
+			System.out.println("^"+estadoAtual.nome);
+			saida.append("^"+estadoAtual.nome+"\n");
+			
+			if (regras.get(estadoAtual, s) != null) {
+				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", "+s+")->"+regras.get(estadoAtual, s).nome);
+				System.out.println();
+				saida.append("Transicao utilizada: ("+estadoAtual.nome+", "+s+")->"+regras.get(estadoAtual, s).nome+"\n\n");
+			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
+				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", *)->"+regras.get(estadoAtual, "(*)").nome);
+				System.out.println();
+				saida.append("Transicao utilizada: ("+estadoAtual.nome+", *)->"+regras.get(estadoAtual, "(*)").nome+"\n\n");
+			}
+
 		}
+	
+
+		
 		return saida.toString();
 		
 	}
@@ -120,7 +228,7 @@ public class AutomatoFinito {
 	 * @return AF
 	 * @throws Exception 
 	 */
-	public void construirAutomato(String arquivo) throws Exception {
+	public void construir(String arquivo) throws Exception {
 		this.arquivoDeOrigem = arquivo;
 		String ref = null;
 		String linha = null;
@@ -230,14 +338,22 @@ public class AutomatoFinito {
 			FileReader file = new FileReader(arquivo); // read a file
 			BufferedReader buffer = new BufferedReader(file);
 			
+			System.out.println("Inciando processamento do arquivo: "+arquivo);
+			
+			System.out.println("Saidas obtidas:");
+			
 			linha = buffer.readLine();	/* Le  a primeira linha */
 			while(linha != null){
 				saidaIndividual = null;
 				
 				if(this.interpretar(linha)) {
-					saida.append(linha+" VALIDA\n\n");
+					System.out.println(linha+" VALIDA");
+					System.out.println("----------------------------------------------------------------------------");
+					saida.append(linha+" VALIDA\n----------------------------------------------------------------------------");
 				} else {
-					saida.append(linha+" NAO-VALIDA\n\n");
+					System.out.println(linha+" NAO-VALIDA");
+					System.out.println("----------------------------------------------------------------------------");
+					saida.append(linha+" NAO-VALIDA\n----------------------------------------------------------------------------");
 				}
 				
 				/*
@@ -245,15 +361,13 @@ public class AutomatoFinito {
 				 */
 				BufferedWriter out = new BufferedWriter(new FileWriter(arquivoDeOrigem+": "+linha)); 
 				out.write(saidaIndividual); 
-				System.out.println(saidaIndividual);
 				out.close();
 				
 				linha = buffer.readLine();
 			}
-			BufferedWriter outFinal = new BufferedWriter(new FileWriter("saida de "+arquivoDeOrigem+" para as entradas em "+arquivo)); 
-			outFinal.write(saida.toString()); 
-			System.out.println(saida.toString());
-			outFinal.close();
+			BufferedWriter out = new BufferedWriter(new FileWriter("saida de "+arquivoDeOrigem+" para as entradas em "+arquivo)); 
+			out.write(saida.toString()); 
+			out.close();
 			buffer.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
