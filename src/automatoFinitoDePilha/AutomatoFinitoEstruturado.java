@@ -1,4 +1,4 @@
-package af_estruturado;
+package automatoFinitoDePilha;
 
 /**M = (Q, A, S, G, P, q0, z0, F)
  * Q: ArrayList<Estado> estados
