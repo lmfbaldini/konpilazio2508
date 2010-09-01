@@ -1,4 +1,4 @@
-package af;
+package automatoFinito;
 
 public class Estado {
 	public String nome;

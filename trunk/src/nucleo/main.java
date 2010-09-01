@@ -1,10 +1,6 @@
 package nucleo;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import af.*;
+import automatoFinito.AutomatoFinito;
 
 public class main {
 

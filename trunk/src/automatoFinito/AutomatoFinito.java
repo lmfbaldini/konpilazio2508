@@ -1,4 +1,4 @@
-package af;
+package automatoFinito;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -6,11 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-import java.util.Timer;
-
 
 /**M = (Q, S, P, q0, F)
  * Q: ArrayList<Estado> estados
@@ -251,14 +248,14 @@ public class AutomatoFinito {
 				}
 				
 				if (ref.equals("ESTADOS")) {
-					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
+					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por ' ',\n,\t,\r ou \f */
 					if (valores.countTokens() != 2) {
 						throw leituraException;
 					}
 					String nome = valores.nextToken();
 					Integer tipo = Integer.parseInt(valores.nextToken());
-					if ((tipo == 0 || tipo == 1) && estadoInicial)
-						throw a01Exception;
+					if ((tipo == 0 || tipo == 1) && estadoInicial) 
+						throw a01Exception; // Caso o estado inicial ja esteja setado temos um erro
 					else
 						estadoInicial = true;
 					estados.add(new Estado(nome, tipo));

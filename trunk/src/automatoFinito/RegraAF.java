@@ -1,4 +1,4 @@
-package af;
+package automatoFinito;
 
 import java.util.Hashtable;
 
