@@ -1,4 +1,4 @@
-package automatoFinito;
+package automatoFinitoEstruturado;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,24 +9,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-/**M = (Q, S, P, q0, F)
+import automatoFinito.AutomatoFinito;
+import automatoFinito.Estado;
+import automatoFinito.RegraAF;
+
+/**M = (Q, A, S, G, P, q0, z0, F)
  * Q: ArrayList<Estado> estados
  * S: ArrayList<Estado> simbolos
  * P: RegraAF<Estado, String, Estado> regras
  * q0: Estado identificado como inicial em ArrayList<Estado> estados
  * F: Estados identificados como finais em ArrayList<Estado> estados
- * 
- * Este automato pode resolver nao determinismos atravez de um mecanismo que ira trilhar todos os caminhos possiveis
- * gerados pelos nao determinismos (evitando loops). Caso encontre um caminho que consuma a cadeia e termine em um estado
- * de aceitacao, ele para e aceita a cadeia. Caso nenhum dos caminhos consuma a cadeia inteira ou termine em um estado de 
- * rejeicao mesmo que consuma a cadeia, o automato rejeitara a cadeia.
- * 
- * 
+ * A: 
  * 
  * @author Baldini
  *
  */
-public class AutomatoFinito {
+public class AutomatoFinitoEstruturado {
 	public ArrayList<Estado> estados;
 	public ArrayList<String> simbolos;
 	/*
@@ -34,10 +32,12 @@ public class AutomatoFinito {
 	 * de um estado.
 	 */
 	public RegraAF<Estado, String, Estado> regras;
+		
+	
 	private String arquivoDeOrigem;
 	private String saidaIndividual;
 	
-	public AutomatoFinito() {
+	public AutomatoFinitoEstruturado() {
 		estados = new ArrayList<Estado>();
 		simbolos = new ArrayList<String>();
 		regras = new RegraAF<Estado, String, Estado>();
@@ -402,5 +402,4 @@ public class AutomatoFinito {
 		}
 		
 	}
-	
 }
