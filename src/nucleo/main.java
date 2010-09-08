@@ -1,6 +1,7 @@
 package nucleo;
 
 import automatoFinito.AutomatoFinito;
+import automatoFinitoEstruturado.AutomatoFinitoEstruturado;
 
 public class main {
 
@@ -8,7 +9,7 @@ public class main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		AutomatoFinito automato = new AutomatoFinito();
+		AutomatoFinitoEstruturado automato = new AutomatoFinitoEstruturado();
 		
 		try {
 			automato.construir(args[0]);
@@ -17,15 +18,15 @@ public class main {
 			System.exit(1);
 		}
 		
-		
+		System.out.println("Fim da leitura");
 		try {
-			automato.processarArquivoDeEntrada(args[1],false);
+			automato.interpretar(args[1],automato.submaquinas);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
 		}
 
-		
+		System.out.println("Fim da execucao");
 		
 	}
 

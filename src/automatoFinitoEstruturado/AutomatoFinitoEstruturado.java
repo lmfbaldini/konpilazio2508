@@ -1,15 +1,13 @@
 package automatoFinitoEstruturado;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Stack;
 import java.util.StringTokenizer;
 
-import automatoFinito.AutomatoFinito;
 import automatoFinito.Estado;
 import automatoFinito.RegraAF;
 
@@ -27,13 +25,15 @@ import automatoFinito.RegraAF;
 public class AutomatoFinitoEstruturado {
 	public ArrayList<Estado> estados;
 	public ArrayList<String> simbolos;
+	public ArrayList<AutomatoFinitoEstruturado> submaquinas;
+	public PilhaAF_E<AutomatoFinitoEstruturado,Estado> pilha;
 	/*
 	 * A tabela hash de transicoes utiliza como chave uma String construida como a concatenacao de um simbolo com o nome
 	 * de um estado.
 	 */
 	public RegraAF<Estado, String, Estado> regras;
-		
-	
+	public String nome = null; //NOME DESTA MAQUINA
+	private Integer tipo = null;
 	private String arquivoDeOrigem;
 	private String saidaIndividual;
 	
@@ -41,6 +41,8 @@ public class AutomatoFinitoEstruturado {
 		estados = new ArrayList<Estado>();
 		simbolos = new ArrayList<String>();
 		regras = new RegraAF<Estado, String, Estado>();
+		submaquinas = new ArrayList<AutomatoFinitoEstruturado>();
+		pilha = new PilhaAF_E<AutomatoFinitoEstruturado, Estado>();
 		this.clear();
 	}
 	
@@ -48,36 +50,203 @@ public class AutomatoFinitoEstruturado {
 		estados.clear();
 		simbolos.clear();
 		regras.clear();
+		submaquinas.clear();
+		pilha.clear();
 	}
 	
-	public void setarAutomato(AutomatoFinito af) {
-		this.estados.addAll(af.estados);
-		this.simbolos.addAll(af.simbolos);
-		this.regras.putAll(af.regras);
-	}
 	
-	/*
-	 * Aceita automatos nao-deterministicos
+	
+	
+	/**
+	 * controi o automato considerando o arquivo do tipo 01
+	 * ARQUIVO DO TIPO 01: Cada linha contem uma informacao, 
+	 * a palavra ESTADOS inidica que as proximas linha serao estados (cada estado tera um nome e um tipo, separados por um espaco,
+	 * o tipo de um estado vale 0 p/ estado INICIAL NAO-FINAL, 1 para estado de INICIAL FINAL, 2 para estado de NAO-FINAL
+	 * e 3 para FINAL), 
+	 * a palavra SIMBOLOS indica que as proximas linhas serao simbolos
+	 * e por fim a palavra REGRAS indica que as proximas linhas serao regras (um nome de estado, um simbolo e um outro
+	 * nome de estado, separados por espacos).
+	 * O SIMBOLO ESPECIAL PARA "OUTROS" SIMBOLOS EH (*) (asteristico envolvido por dois parenteses)
+	 * O SIMBOLO ESPECIAL PARA TRANSICOES EM VAZIO EH (@)
+	 * 
+	 * @return AF
+	 * @throws Exception 
 	 */
-	public boolean interpretarGeral(String w) {
-		//TODO
+	public void construir(String arquivo) throws Exception {
+		this.arquivoDeOrigem = arquivo;
+		String ref = null;
+		String linha = null;
 		
-		
-		return false;
+		try {
+			FileReader file = new FileReader(arquivo); // read a file
+			BufferedReader buffer = new BufferedReader(file);
+			StringTokenizer valores;
+			boolean estadoInicial = false; /* booleano para verificar se o estado inicial está preenchido */
+			Exception leituraException = new Exception("Erro lendo arquivo, formato inválido");
+			Exception a01Exception = new Exception("O automato contem mais de um estado inicial");
+
+			
+			linha = buffer.readLine();	/* Le  a primeira linha */
+			if (linha.equals("SUBMAQUINAS")) {
+				linha = buffer.readLine();
+				while (!linha.equals("---SUB---")) {
+					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
+					if (valores.countTokens() != 1) {
+						throw leituraException;
+					}
+					submaquinas.add(new AutomatoFinitoEstruturado());
+					if (submaquinas.size() == 1) {
+						this.tipo = 0;
+						this.nome = valores.nextToken();
+						submaquinas.set(submaquinas.size()-1, this);
+					}
+					else {
+						submaquinas.get(submaquinas.size()-1).tipo = 1;
+						submaquinas.get(submaquinas.size()-1).nome = valores.nextToken();
+					}
+					linha = buffer.readLine();
+				}
+			}
+			linha = buffer.readLine();
+			String maquinaAtual = linha;
+			linha = buffer.readLine();
+			while(!linha.equals("---EOF---") && linha != null){
+				if (linha.equals("ESTADOS") || linha.equals("SIMBOLOS") || linha.equals("REGRAS")) {
+					ref = linha;
+					linha = buffer.readLine();
+					continue;
+				}
+				
+				if (linha.equals("---SUB---")) {
+					estadoInicial = false;
+					maquinaAtual = (linha = buffer.readLine());
+					linha = buffer.readLine();
+					continue;
+				}
+				
+				if (ref.equals("ESTADOS")) {
+					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por ' ',\n,\t,\r ou \f */
+					if (valores.countTokens() != 2) {
+						throw leituraException;
+					}
+					String nome = valores.nextToken();
+					Integer tipo = Integer.parseInt(valores.nextToken());
+					if ((tipo == 0 || tipo == 1) && estadoInicial) 
+						throw a01Exception; // Caso o estado inicial ja esteja setado temos um erro
+					else
+						estadoInicial = true;
+					if (submaquinas.get(0).nome.equals(maquinaAtual)) {
+						estados.add(new Estado(nome, tipo));
+						submaquinas.set(0, this);
+					} else {
+						for (AutomatoFinitoEstruturado a : submaquinas) {
+							if (a.nome.equals(maquinaAtual)) {
+								a.estados.add(new Estado(nome, tipo));
+							}
+						}
+					}
+					
+				} else if (ref.equals("SIMBOLOS")) {
+					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
+					if (valores.countTokens() != 1) {
+						throw leituraException;
+					}
+					String simb = valores.nextToken();
+					if (submaquinas.get(0).nome.equals(maquinaAtual)) {
+						simbolos.add(simb);
+						submaquinas.set(0, this);
+					} else {
+						for (AutomatoFinitoEstruturado a : submaquinas) {
+							if (a.nome.equals(maquinaAtual)) {
+								a.simbolos.add(simb);
+							}
+						}
+					}
+					
+				} else if (ref.equals("REGRAS")) {
+					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
+					if (valores.countTokens() != 3) {
+						throw leituraException;
+					}
+					String estadoAux1 = valores.nextToken();
+					Estado estado1 = null;
+					for (Estado e : estados) {
+						if (e.nome.equals(estadoAux1))
+							estado1 = new Estado(e);
+					}
+					String simboloAux = valores.nextToken();
+					String simbolo = null;
+					for (String e : simbolos) {
+						if (e.equals(simboloAux))
+							simbolo = e;
+					}
+					if (simboloAux.equals("(*)"))
+						simbolo = simboloAux;
+					if (simboloAux.equals("(@)"))
+						simbolo = simboloAux;
+					for (AutomatoFinitoEstruturado a : submaquinas) {
+						if (a.nome.equals(simboloAux))
+							simbolo = simboloAux;
+					}
+					String estadoAux2 = valores.nextToken();
+					Estado estado2 = null;
+					for (Estado e : estados) {
+						if (e.nome.equals(estadoAux2))
+							estado2 = new Estado(e);
+					}
+					if (estado1 != null & simbolo != null & estado2 != null) {
+						if (submaquinas.get(0).nome.equals(maquinaAtual)) {
+							regras.put(estado1, simbolo, estado2);
+							submaquinas.set(0, this);
+						} else {
+							for (AutomatoFinitoEstruturado a : submaquinas) {
+								if (a.nome.equals(maquinaAtual)) {
+									a.regras.put(estado1, simbolo, estado2);
+								}
+							}
+						}
+					}
+					else
+						throw a01Exception;
+					
+				} else {
+					throw leituraException;
+				}
+				
+				
+				
+				linha = buffer.readLine();
+			}			
+			
+			buffer.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
+			e.printStackTrace();
+			System.exit(1);
+		} catch (IOException e) {
+			System.out.println("Nao foi possivel ler do arquivo.");
+			e.printStackTrace();
+			System.exit(1);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(1);
+		}
 		
 	}
 	
-	public boolean interpretar(String w) {
+	public boolean interpretar(String w, ArrayList<AutomatoFinitoEstruturado> submaquinasIn) {
 		Estado estadoAtual = null;
 		StringBuffer saida = new StringBuffer();
 		/* Converte a sequencia de simbolos de entrada (todos caracteres, concatenados em uma string)
 		 * para um Array de elementos na mesma ordem, para facilitar a compracacao no algoritimo e evitar casts explicitos
 		 */
 		ArrayList<String> simbolosDaCadeia = new ArrayList<String>();
+		ArrayList<String> simbolosDaCadeiaAux = new ArrayList<String>();
 		char[] Saux = w.toCharArray();
 		for (char d : Saux) {
 			String S = String.valueOf(d);
 			simbolosDaCadeia.add(S);
+			simbolosDaCadeiaAux.add(S);
 		}
 		/*
 		 * Seta o estado inicial
@@ -91,14 +260,40 @@ public class AutomatoFinitoEstruturado {
 		 */
 		saida.append(imprimeSaida(w,"",-1,estadoAtual,null, -1));
 		int contador = 0;
-		for (String s : simbolosDaCadeia) {
+		boolean retorno = false;
+		while (simbolosDaCadeiaAux.size() != 0) {
+			String s = simbolosDaCadeiaAux.get(0);
 			if (regras.get(estadoAtual, s) != null) {
 				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, s).getFirst(), 0));
 				estadoAtual = regras.get(estadoAtual, s).getFirst();
+				simbolosDaCadeiaAux.remove(0);
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
 				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(*)").getFirst(), 0));
 				estadoAtual = regras.get(estadoAtual, "(*)").getFirst();
+				simbolosDaCadeiaAux.remove(0);
+			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(@)") != null) {
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(@)").getFirst(), 0));
+				estadoAtual = regras.get(estadoAtual, "(@)").getFirst();
+				contador--;
 			} else {
+				for (AutomatoFinitoEstruturado maq : submaquinasIn) {
+					if (regras.get(estadoAtual, maq.nome) != null) {
+						pilha.push(this, regras.get(estadoAtual, maq.nome).getFirst());
+						if (maq.interpretar(simbolosDaCadeiaAux.toString(), submaquinasIn)) {
+							estadoAtual = pilha.pop_U(pilha.pop_T());
+							retorno = true;
+							break;
+						} else {
+							return false;
+						}
+					}
+				}
+				if (estadoAtual.tipo == 3 && this.tipo != 0) {
+					return true;
+				}
+				if (retorno = true) {
+					continue;
+				}
 				saida.append(imprimeSaida(w,s,contador,estadoAtual,null, -2));
 				saidaIndividual = saida.toString();
 				return false;
@@ -116,52 +311,6 @@ public class AutomatoFinitoEstruturado {
 		return false;
 		
 	}
-	
-	public boolean interpretarCadeiaTratada(String w, String separador) {
-		Estado estadoAtual = null;
-		StringBuffer saida = new StringBuffer();
-		/* Tokeniza a string de entrada pelo separador passado como parametro
-		 */
-		StringTokenizer simbolosDaCadeia = new StringTokenizer(w, separador);
-		/*
-		 * Seta o estado inicial
-		 */
-		for (Estado q : estados) {
-			if (q.tipo == 0 || q.tipo == 1)
-				estadoAtual = q;
-		}
-		/*
-		 * Comeca a leitura da cadeia
-		 */
-		saida.append(imprimeSaida(w,"",-1,estadoAtual,null, -1));
-		int contador = 0;
-		String s = null;
-		while ((s = simbolosDaCadeia.nextToken())!= null) {
-			if (regras.get(estadoAtual, s) != null) {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, s).getFirst(), 0));
-				estadoAtual = regras.get(estadoAtual, s).getFirst();
-			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(*)").getFirst(), 0));
-				estadoAtual = regras.get(estadoAtual, "(*)").getFirst();
-			} else {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,null, -2));
-				saidaIndividual = saida.toString();
-				return false;
-			}
-			contador++;
-		}
-		
-		if (estadoAtual.tipo == 3 || estadoAtual.tipo == 1) {
-			saida.append(imprimeSaida(w,"",-3,estadoAtual,null, -3));
-			saidaIndividual = saida.toString();
-			return true;
-		}
-		saida.append(imprimeSaida(w,"",-4,estadoAtual,null, -4));
-		saidaIndividual = saida.toString();
-		return false;
-		
-	}
-	
 	
 	private String imprimeSaida(String w, String s, int contador, Estado estadoAtual, Estado proxEstado, int tipo) {
 		StringBuffer saida = new StringBuffer();
@@ -216,9 +365,13 @@ public class AutomatoFinitoEstruturado {
 				System.out.println();
 				saida.append("Transicao utilizada: ("+estadoAtual.nome+", "+s+")->"+proxEstado.nome+"\n\n");
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
-				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", *)->"+proxEstado.nome);
+				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", (*))->"+proxEstado.nome);
 				System.out.println();
-				saida.append("Transicao utilizada: ("+estadoAtual.nome+", *)->"+proxEstado.nome+"\n\n");
+				saida.append("Transicao utilizada: ("+estadoAtual.nome+", (*))->"+proxEstado.nome+"\n\n");
+			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(@)") != null) {
+				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", (@))->"+proxEstado.nome);
+				System.out.println();
+				saida.append("Transicao utilizada: ("+estadoAtual.nome+", (@))->"+proxEstado.nome+"\n\n");
 			}
 
 		}
@@ -228,178 +381,6 @@ public class AutomatoFinitoEstruturado {
 		return saida.toString();
 		
 	}
-
-	/**
-	 * controi o automato considerando o arquivo do tipo 01
-	 * ARQUIVO DO TIPO 01: Cada linha contem uma informacao, 
-	 * a palavra ESTADOS inidica que as proximas linha serao estados (cada estado tera um nome e um tipo, separados por um espaco,
-	 * o tipo de um estado vale 0 p/ estado INICIAL NAO-FINAL, 1 para estado de INICIAL FINAL, 2 para estado de NAO-FINAL
-	 * e 3 para FINAL), 
-	 * a palavra SIMBOLOS indica que as proximas linhas serao simbolos
-	 * e por fim a palavra REGRAS indica que as proximas linhas serao regras (um nome de estado, um simbolo e um outro
-	 * nome de estado, separados por espacos).
-	 * O SIMBOLO ESPECIAL PARA "OUTROS" SIMBOLOS É (*) (asteristico envolvido por dois parenteses)
-	 * 
-	 * @return AF
-	 * @throws Exception 
-	 */
-	public void construir(String arquivo) throws Exception {
-		this.arquivoDeOrigem = arquivo;
-		String ref = null;
-		String linha = null;
-		
-		try {
-			FileReader file = new FileReader(arquivo); // read a file
-			BufferedReader buffer = new BufferedReader(file);
-			StringTokenizer valores;
-			boolean estadoInicial = false; /* booleano para verificar se o estado inicial está preenchido */
-			Exception leituraException = new Exception("Erro lendo arquivo, formato inválido");
-			Exception a01Exception = new Exception("O automato contem mais de um estado inicial");
-
-			
-			linha = buffer.readLine();	/* Le  a primeira linha */
-			while(linha != null){
-				if (linha.equals("ESTADOS") || linha.equals("SIMBOLOS") || linha.equals("REGRAS")) {
-					ref = linha;
-					linha = buffer.readLine();
-					continue;
-				}
-				
-				if (ref.equals("ESTADOS")) {
-					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por ' ',\n,\t,\r ou \f */
-					if (valores.countTokens() != 2) {
-						throw leituraException;
-					}
-					String nome = valores.nextToken();
-					Integer tipo = Integer.parseInt(valores.nextToken());
-					if ((tipo == 0 || tipo == 1) && estadoInicial) 
-						throw a01Exception; // Caso o estado inicial ja esteja setado temos um erro
-					else
-						estadoInicial = true;
-					estados.add(new Estado(nome, tipo));
-					
-				} else if (ref.equals("SIMBOLOS")) {
-					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
-					if (valores.countTokens() != 1) {
-						throw leituraException;
-					}
-					simbolos.add(valores.nextToken());
-					
-				} else if (ref.equals("REGRAS")) {
-					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
-					if (valores.countTokens() != 3) {
-						throw leituraException;
-					}
-					String estadoAux1 = valores.nextToken();
-					Estado estado1 = null;
-					for (Estado e : estados) {
-						if (e.nome.equals(estadoAux1))
-							estado1 = new Estado(e);
-					}
-					String simboloAux = valores.nextToken();
-					String simbolo = null;
-					for (String e : simbolos) {
-						if (e.equals(simboloAux))
-							simbolo = e;
-					}
-					if (simboloAux.equals("(*)"))
-						simbolo = simboloAux;
-					String estadoAux2 = valores.nextToken();
-					Estado estado2 = null;
-					for (Estado e : estados) {
-						if (e.nome.equals(estadoAux2))
-							estado2 = new Estado(e);
-					}
-					if (estado1 != null & simbolo != null & estado2 != null)
-						regras.put(estado1, simbolo, estado2);
-					else
-						throw a01Exception;
-					
-				} else {
-					throw leituraException;
-				}
-				
-				
-				
-				linha = buffer.readLine();
-			}
-			
-			buffer.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
-			e.printStackTrace();
-			System.exit(1);
-		} catch (IOException e) {
-			System.out.println("Nao foi possivel ler do arquivo.");
-			e.printStackTrace();
-			System.exit(1);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			System.exit(1);
-		}
-		
-	}
 	
-	/**
-	 * processa um arquivo que contem a cada linha uma cadeia para ser interpretada pelo automato.
-	 * ao final gera-se um arquivo de saida com a interpretacao de cada cadeia descrita.
-	 * 
-	 * @throws Exception 
-	 */
-	public void processarArquivoDeEntrada(String arquivo, boolean verbose) throws Exception {
-		String linha = null;
-		StringBuffer saida = new StringBuffer();
-		try {
-			FileReader file = new FileReader(arquivo); // read a file
-			BufferedReader buffer = new BufferedReader(file);
-			
-			System.out.println("Inciando processamento do arquivo: "+arquivo);
-			
-			System.out.println("Saidas obtidas:");
-			
-			linha = buffer.readLine();	/* Le  a primeira linha */
-			while(linha != null){
-				saidaIndividual = null;
-				
-				if(this.interpretar(linha)) {
-					System.out.println(linha+" VALIDA");
-					System.out.println("----------------------------------------------------------------------------");
-					saida.append(linha+" VALIDA\n----------------------------------------------------------------------------");
-				} else {
-					System.out.println(linha+" NAO-VALIDA");
-					System.out.println("----------------------------------------------------------------------------");
-					saida.append(linha+" NAO-VALIDA\n----------------------------------------------------------------------------");
-				}
-				
-				/*
-				 * Imprime saidas individuais para cada cadeia, detalhando a execucao, passo a passo
-				 */
-				if (verbose) {
-					BufferedWriter out = new BufferedWriter(new FileWriter(arquivoDeOrigem+": "+linha)); 
-					out.write(saidaIndividual); 
-					out.close();
-				}
-				
-				linha = buffer.readLine();
-			}
-			if (verbose) {
-				BufferedWriter out = new BufferedWriter(new FileWriter("saida de "+arquivoDeOrigem+" para as entradas em "+arquivo)); 
-				out.write(saida.toString()); 
-				out.close();
-			}
-			buffer.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
-			e.printStackTrace();
-			System.exit(1);
-		} catch (IOException e) {
-			System.out.println("Nao foi possivel ler do arquivo.");
-			e.printStackTrace();
-			System.exit(1);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			System.exit(1);
-		}
-		
-	}
+	
 }
