@@ -1,6 +1,7 @@
 SUBMAQUINAS
-"S"
-SUB "S"
+<S>
+---SUB---
+<S>
 ESTADOS
 A 0
 B 2
@@ -24,11 +25,11 @@ A a D
 A ( B
 A [ E
 A { G
-B "S" C
-E "S" F
-G "S" H
+B <S> C
+E <S> F
+G <S> H
 C ) D
 F ] D
 H } D
 D , A
-
+---EOF---

@@ -74,10 +74,12 @@ public class AutomatoFinito {
 		 * para um Array de elementos na mesma ordem, para facilitar a compracacao no algoritimo e evitar casts explicitos
 		 */
 		ArrayList<String> simbolosDaCadeia = new ArrayList<String>();
+		ArrayList<String> simbolosDaCadeiaAux = new ArrayList<String>();
 		char[] Saux = w.toCharArray();
 		for (char d : Saux) {
 			String S = String.valueOf(d);
 			simbolosDaCadeia.add(S);
+			simbolosDaCadeiaAux.add(S);
 		}
 		/*
 		 * Seta o estado inicial
@@ -91,13 +93,20 @@ public class AutomatoFinito {
 		 */
 		saida.append(imprimeSaida(w,"",-1,estadoAtual,null, -1));
 		int contador = 0;
-		for (String s : simbolosDaCadeia) {
+		while (simbolosDaCadeiaAux.size() != 0) {
+			String s = simbolosDaCadeiaAux.get(0);
 			if (regras.get(estadoAtual, s) != null) {
 				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, s).getFirst(), 0));
 				estadoAtual = regras.get(estadoAtual, s).getFirst();
+				simbolosDaCadeiaAux.remove(0);
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
 				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(*)").getFirst(), 0));
 				estadoAtual = regras.get(estadoAtual, "(*)").getFirst();
+				simbolosDaCadeiaAux.remove(0);
+			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(@)") != null) {
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(@)").getFirst(), 0));
+				estadoAtual = regras.get(estadoAtual, "(@)").getFirst();
+				contador--;
 			} else {
 				saida.append(imprimeSaida(w,s,contador,estadoAtual,null, -2));
 				saidaIndividual = saida.toString();
@@ -143,6 +152,9 @@ public class AutomatoFinito {
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
 				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(*)").getFirst(), 0));
 				estadoAtual = regras.get(estadoAtual, "(*)").getFirst();
+			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(@)") != null) {
+				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(@)").getFirst(), 0));
+				estadoAtual = regras.get(estadoAtual, "(@)").getFirst();
 			} else {
 				saida.append(imprimeSaida(w,s,contador,estadoAtual,null, -2));
 				saidaIndividual = saida.toString();
@@ -216,9 +228,13 @@ public class AutomatoFinito {
 				System.out.println();
 				saida.append("Transicao utilizada: ("+estadoAtual.nome+", "+s+")->"+proxEstado.nome+"\n\n");
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
-				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", *)->"+proxEstado.nome);
+				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", (*))->"+proxEstado.nome);
 				System.out.println();
-				saida.append("Transicao utilizada: ("+estadoAtual.nome+", *)->"+proxEstado.nome+"\n\n");
+				saida.append("Transicao utilizada: ("+estadoAtual.nome+", (*))->"+proxEstado.nome+"\n\n");
+			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(@)") != null) {
+				System.out.println("Transicao utilizada: ("+estadoAtual.nome+", (@))->"+proxEstado.nome);
+				System.out.println();
+				saida.append("Transicao utilizada: ("+estadoAtual.nome+", (@))->"+proxEstado.nome+"\n\n");
 			}
 
 		}
@@ -238,7 +254,8 @@ public class AutomatoFinito {
 	 * a palavra SIMBOLOS indica que as proximas linhas serao simbolos
 	 * e por fim a palavra REGRAS indica que as proximas linhas serao regras (um nome de estado, um simbolo e um outro
 	 * nome de estado, separados por espacos).
-	 * O SIMBOLO ESPECIAL PARA "OUTROS" SIMBOLOS É (*) (asteristico envolvido por dois parenteses)
+	 * O SIMBOLO ESPECIAL PARA "OUTROS" SIMBOLOS EH (*) (asteristico envolvido por dois parenteses)
+	 * O SIMBOLO ESPECIAL PARA TRANSICOES EM VAZIO EH (@)
 	 * 
 	 * @return AF
 	 * @throws Exception 
@@ -303,6 +320,8 @@ public class AutomatoFinito {
 							simbolo = e;
 					}
 					if (simboloAux.equals("(*)"))
+						simbolo = simboloAux;
+					if (simboloAux.equals("(@)"))
 						simbolo = simboloAux;
 					String estadoAux2 = valores.nextToken();
 					Estado estado2 = null;
