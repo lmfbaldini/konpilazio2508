@@ -1,12 +1,12 @@
-package automatoFinito;
+package automatoFinitoEstruturado;
 
 import java.util.Hashtable;
 import java.util.LinkedList;
 
-public class RegraAF<T, U, V> {
+public class RegraAF_E<T, U, V> {
 	private Hashtable<T, Hashtable<U, LinkedList<V>>> tabela;
 	
-	public RegraAF() {
+	public RegraAF_E() {
 		tabela = new Hashtable<T, Hashtable<U,LinkedList<V>>>();
 	}
 	
@@ -52,7 +52,7 @@ public class RegraAF<T, U, V> {
 		
 	}
 
-	public void putAll(RegraAF<T, U, V> tabelaInterna) {
+	public void putAll(RegraAF_E<T, U, V> tabelaInterna) {
 		this.tabela.putAll(tabelaInterna.tabela);
 		
 	}

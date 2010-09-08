@@ -16,9 +16,10 @@ public class main {
 			System.out.println(e.getMessage());
 			System.exit(1);
 		}
-
+		
+		
 		try {
-			automato.processarArquivoDeEntrada(args[1],true);
+			automato.processarArquivoDeEntrada(args[1],false);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
