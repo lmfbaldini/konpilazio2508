@@ -4,8 +4,8 @@ import java.util.Hashtable;
 import java.util.Stack;
 
 public class PilhaAF_E<T, U> {
-	private Stack<T> pilhaInterna;
-	private Hashtable<T, Stack<U>> mapa;
+	public Stack<T> pilhaInterna;
+	public Hashtable<T, Stack<U>> mapa;
 	
 	public PilhaAF_E() {
 		pilhaInterna = new Stack<T>();
@@ -48,7 +48,6 @@ public class PilhaAF_E<T, U> {
 	public U peek_U(T t) {
 		return mapa.get(t).peek();
 		
-	}
-	
+	}	
 	
 }
