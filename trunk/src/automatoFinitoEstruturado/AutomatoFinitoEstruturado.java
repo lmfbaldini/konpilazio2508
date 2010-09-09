@@ -285,12 +285,15 @@ public class AutomatoFinitoEstruturado {
 					if (regras.get(estadoAtual, maq.nome) != null) {
 						saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -5, maq.nome));
 						pilha.push(this, regras.get(estadoAtual, maq.nome).getFirst());
-						int ret = maq.interpretar(parse(simbolosDaCadeiaAux), parse(simbolosDaCadeia), submaquinasIn, saida, true, contador);
+						int ret = maq.interpretar(parse(simbolosDaCadeiaAux), parse(simbolosDaCadeia), submaquinasIn, saida, true, contador+refCadeia);
 						if (ret == -1) {
 							//saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -5, maq.nome));
 							saida.append(imprimeSaida(wOriginal,s,contador+refCadeia,estadoAtual,null, -2, null));
 							saidaIndividual = saida.toString();
-							return 0;
+							if (sub == true)
+								return -1;
+							else
+								return 0;
 						} else if (ret != 0){
 							estadoAtual = pilha.pop_U(pilha.pop_T());
 							saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -6, maq.nome));
@@ -310,24 +313,37 @@ public class AutomatoFinitoEstruturado {
 				if (estadoAtual.tipo == 3 && sub == true) {
 					return contador;
 				}
-				if (retorno == true && simbolosDaCadeiaAux.size() != 0) {
-					continue;
+				if (retorno == true) {
+					if (simbolosDaCadeiaAux.size() != 0) {
+						continue;
+					} else if (sub == true) {
+						return 0;
+					} else if (simbolosDaCadeiaAux.size() == 0) {
+						break;
+					}
 				}
-				saida.append(imprimeSaida(wOriginal,s,contador+refCadeia,estadoAtual,null, -2, null));
-				saidaIndividual = saida.toString();
+				if (sub == false) {
+					saida.append(imprimeSaida(wOriginal,s,contador+refCadeia,estadoAtual,null, -2, null));
+					saidaIndividual = saida.toString();
+				}
 				return 0;
 			}
 			contador++;
 		}
 		
 		if (estadoAtual.tipo == 3 || estadoAtual.tipo == 1) {
-			saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -3, null));
-			saidaIndividual = saida.toString();
+			if (sub == false) {
+				saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -3, null));
+				saidaIndividual = saida.toString();
+			}
 			return contador;
 		}
-		saida.append(imprimeSaida(wOriginal,"",-4,estadoAtual,null, -4, null));
-		saidaIndividual = saida.toString();
+		if (sub == false) {
+			saida.append(imprimeSaida(wOriginal,"",-4,estadoAtual,null, -4, null));
+			saidaIndividual = saida.toString();
+		}
 		return 0;
+
 		
 	}
 	
