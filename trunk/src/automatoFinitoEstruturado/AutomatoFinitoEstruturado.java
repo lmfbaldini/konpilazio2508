@@ -1,8 +1,10 @@
 package automatoFinitoEstruturado;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -234,19 +236,23 @@ public class AutomatoFinitoEstruturado {
 		
 	}
 	
-	public boolean interpretar(String w, ArrayList<AutomatoFinitoEstruturado> submaquinasIn) {
+	public int interpretar(String w, String wOriginal, ArrayList<AutomatoFinitoEstruturado> submaquinasIn, StringBuffer saida2, boolean sub, int refCadeia) {
 		Estado estadoAtual = null;
-		StringBuffer saida = new StringBuffer();
-		/* Converte a sequencia de simbolos de entrada (todos caracteres, concatenados em uma string)
-		 * para um Array de elementos na mesma ordem, para facilitar a compracacao no algoritimo e evitar casts explicitos
-		 */
-		ArrayList<String> simbolosDaCadeia = new ArrayList<String>();
 		ArrayList<String> simbolosDaCadeiaAux = new ArrayList<String>();
+		StringBuffer saida = new StringBuffer();
+		ArrayList<String> simbolosDaCadeia = new ArrayList<String>();
 		char[] Saux = w.toCharArray();
 		for (char d : Saux) {
 			String S = String.valueOf(d);
-			simbolosDaCadeia.add(S);
 			simbolosDaCadeiaAux.add(S);
+		}
+		Saux = wOriginal.toCharArray();
+		for (char d : Saux) {
+			String S = String.valueOf(d);
+			simbolosDaCadeia.add(S);
+		}
+		if (sub == true) {
+			saida.append(saida2);
 		}
 		/*
 		 * Seta o estado inicial
@@ -258,61 +264,81 @@ public class AutomatoFinitoEstruturado {
 		/*
 		 * Comeca a leitura da cadeia
 		 */
-		saida.append(imprimeSaida(w,"",-1,estadoAtual,null, -1));
 		int contador = 0;
 		boolean retorno = false;
 		while (simbolosDaCadeiaAux.size() != 0) {
 			String s = simbolosDaCadeiaAux.get(0);
 			if (regras.get(estadoAtual, s) != null) {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, s).getFirst(), 0));
+				saida.append(imprimeSaida(wOriginal,s,contador+refCadeia,estadoAtual,regras.get(estadoAtual, s).getFirst(), 0,null));
 				estadoAtual = regras.get(estadoAtual, s).getFirst();
 				simbolosDaCadeiaAux.remove(0);
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(*)") != null) {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(*)").getFirst(), 0));
+				saida.append(imprimeSaida(wOriginal,s,contador+refCadeia,estadoAtual,regras.get(estadoAtual, "(*)").getFirst(), 0,null));
 				estadoAtual = regras.get(estadoAtual, "(*)").getFirst();
 				simbolosDaCadeiaAux.remove(0);
 			} else if (simbolos.contains(s) && regras.get(estadoAtual, "(@)") != null) {
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,regras.get(estadoAtual, "(@)").getFirst(), 0));
+				saida.append(imprimeSaida(wOriginal,s,contador+refCadeia,estadoAtual,regras.get(estadoAtual, "(@)").getFirst(), 0,null));
 				estadoAtual = regras.get(estadoAtual, "(@)").getFirst();
 				contador--;
 			} else {
 				for (AutomatoFinitoEstruturado maq : submaquinasIn) {
 					if (regras.get(estadoAtual, maq.nome) != null) {
+						saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -5, maq.nome));
 						pilha.push(this, regras.get(estadoAtual, maq.nome).getFirst());
-						if (maq.interpretar(simbolosDaCadeiaAux.toString(), submaquinasIn)) {
+						int ret = maq.interpretar(parse(simbolosDaCadeiaAux), parse(simbolosDaCadeia), submaquinasIn, saida, true, contador);
+						if (ret == -1) {
+							//saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -5, maq.nome));
+							saida.append(imprimeSaida(wOriginal,s,contador+refCadeia,estadoAtual,null, -2, null));
+							saidaIndividual = saida.toString();
+							return 0;
+						} else if (ret != 0){
 							estadoAtual = pilha.pop_U(pilha.pop_T());
+							saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -6, maq.nome));
+							for(int i = 0; i<ret; i++) {
+								simbolosDaCadeiaAux.remove(0);
+								contador++;
+							}
 							retorno = true;
 							break;
 						} else {
-							return false;
+							//saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -5, maq.nome));
+
+							return -1;
 						}
 					}
 				}
-				if (estadoAtual.tipo == 3 && this.tipo != 0) {
-					return true;
+				if (estadoAtual.tipo == 3 && sub == true) {
+					return contador;
 				}
-				if (retorno = true) {
+				if (retorno == true && simbolosDaCadeiaAux.size() != 0) {
 					continue;
 				}
-				saida.append(imprimeSaida(w,s,contador,estadoAtual,null, -2));
+				saida.append(imprimeSaida(wOriginal,s,contador+refCadeia,estadoAtual,null, -2, null));
 				saidaIndividual = saida.toString();
-				return false;
+				return 0;
 			}
 			contador++;
 		}
 		
 		if (estadoAtual.tipo == 3 || estadoAtual.tipo == 1) {
-			saida.append(imprimeSaida(w,"",-3,estadoAtual,null, -3));
+			saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -3, null));
 			saidaIndividual = saida.toString();
-			return true;
+			return contador;
 		}
-		saida.append(imprimeSaida(w,"",-4,estadoAtual,null, -4));
+		saida.append(imprimeSaida(wOriginal,"",-4,estadoAtual,null, -4, null));
 		saidaIndividual = saida.toString();
-		return false;
+		return 0;
 		
 	}
 	
-	private String imprimeSaida(String w, String s, int contador, Estado estadoAtual, Estado proxEstado, int tipo) {
+	private String parse(ArrayList<String> simbolosDaCadeiaAux) {
+		StringBuffer aux = new StringBuffer();
+		for (String s : simbolosDaCadeiaAux)
+			aux.append(s);
+		return aux.toString();
+	}
+
+	private String imprimeSaida(String w, String s, int contador, Estado estadoAtual, Estado proxEstado, int tipo, String submaquina) {
 		StringBuffer saida = new StringBuffer();
 
 		if (tipo == -1) { //IMPRIME CONFIG INICIAL
@@ -345,6 +371,14 @@ public class AutomatoFinitoEstruturado {
 		}  else if (tipo == -4) { //IMPRIME SAIDA DE FALHA POR ESTADO FINAL NAO-FINAL
 			System.out.println("A cadeia foi inteiramente consumida contudo o estado atual ("+estadoAtual.nome+") eh NAO-FINAL");
 			saida.append("A cadeia foi inteiramente consumida contudo o estado atual ("+estadoAtual.nome+") eh NAO-FINAL\n");	
+			
+		}  else if (tipo == -5) { //ENTRADA DE SUBMAQUINA
+			System.out.println("Iniciando chamada de submaquina no estado: "+estadoAtual.nome+". Submaquina: "+submaquina);
+			saida.append("Iniciando chamada de submaquina no estado: "+estadoAtual.nome+". Submaquina: "+submaquina+"\n");	
+			
+		}  else if (tipo == -6) { //SAIDA DE SUBMAQUINA
+			System.out.println("Retorno de chamada de submaquina no estado: "+estadoAtual.nome+". Submaquina: "+submaquina);
+			saida.append("Retorno de chamada de submaquina no estado: "+estadoAtual.nome+". Submaquina: "+submaquina+"\n");	
 			
 		} else {
 			System.out.println("Configuracao atual:");
@@ -381,6 +415,70 @@ public class AutomatoFinitoEstruturado {
 		return saida.toString();
 		
 	}
+	
+	/**
+	 * processa um arquivo que contem a cada linha uma cadeia para ser interpretada pelo automato.
+	 * ao final gera-se um arquivo de saida com a interpretacao de cada cadeia descrita.
+	 * 
+	 * @throws Exception 
+	 */
+	public void processarArquivoDeEntrada(String arquivo, boolean verbose) throws Exception {
+		String linha = null;
+		StringBuffer saida = new StringBuffer();
+		try {
+			FileReader file = new FileReader(arquivo); // read a file
+			BufferedReader buffer = new BufferedReader(file);
+			
+			System.out.println("Inciando processamento do arquivo: "+arquivo);
+			
+			System.out.println("Saidas obtidas:");
+			
+			linha = buffer.readLine();	/* Le  a primeira linha */
+			while(linha != null){
+				saidaIndividual = null;
+				
+				if(this.interpretar(linha,linha,this.submaquinas, null, false, 0) != 0) {
+					System.out.println(linha+" VALIDA");
+					System.out.println("----------------------------------------------------------------------------");
+					saida.append(linha+" VALIDA\n----------------------------------------------------------------------------");
+				} else {
+					System.out.println(linha+" NAO-VALIDA");
+					System.out.println("----------------------------------------------------------------------------");
+					saida.append(linha+" NAO-VALIDA\n----------------------------------------------------------------------------");
+				}
+				
+				/*
+				 * Imprime saidas individuais para cada cadeia, detalhando a execucao, passo a passo
+				 */
+				if (verbose) {
+					BufferedWriter out = new BufferedWriter(new FileWriter(arquivoDeOrigem+": "+linha)); 
+					out.write(saidaIndividual); 
+					out.close();
+				}
+				
+				linha = buffer.readLine();
+			}
+			if (verbose) {
+				BufferedWriter out = new BufferedWriter(new FileWriter("saida de "+arquivoDeOrigem+" para as entradas em "+arquivo)); 
+				out.write(saida.toString()); 
+				out.close();
+			}
+			buffer.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
+			e.printStackTrace();
+			System.exit(1);
+		} catch (IOException e) {
+			System.out.println("Nao foi possivel ler do arquivo.");
+			e.printStackTrace();
+			System.exit(1);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(1);
+		}
+		
+	}
+	
 	
 	
 }
