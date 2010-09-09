@@ -285,11 +285,12 @@ public class AutomatoFinitoEstruturado {
 					if (regras.get(estadoAtual, maq.nome) != null) {
 						saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -5, maq.nome));
 						pilha.push(this, regras.get(estadoAtual, maq.nome).getFirst());
+						saida.append(imprimePilha(pilha));
 						int ret = maq.interpretar(parse(simbolosDaCadeiaAux), parse(simbolosDaCadeia), submaquinasIn, saida, true, contador+refCadeia);
 						if (ret == -1) {
-							//saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -5, maq.nome));
-							saida.append(imprimeSaida(wOriginal,s,contador+refCadeia,estadoAtual,null, -2, null));
-							saidaIndividual = saida.toString();
+							if (sub == false) {
+								saidaIndividual = saida.toString();
+							}
 							if (sub == true)
 								return -1;
 							else
@@ -304,8 +305,10 @@ public class AutomatoFinitoEstruturado {
 							retorno = true;
 							break;
 						} else {
-							//saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -5, maq.nome));
-
+							estadoAtual = pilha.pop_U(pilha.pop_T());
+							saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -7, maq.nome));
+							simbolosDaCadeiaAux.remove(0);
+							retorno = true;
 							return -1;
 						}
 					}
@@ -347,6 +350,21 @@ public class AutomatoFinitoEstruturado {
 		
 	}
 	
+	private String imprimePilha(PilhaAF_E<AutomatoFinitoEstruturado, Estado> pilha2) {
+		StringBuffer aux = new StringBuffer();
+		int i = 0;
+		aux.append("Pilha:\n");
+		
+		for (AutomatoFinitoEstruturado a : pilha2.pilhaInterna) {
+			aux.append(i+" :"+a.nome+" - "+pilha2.mapa.get(a).peek().toString()+"\n");
+			i++;
+		}
+		
+		System.out.println(aux.toString());
+		
+		return aux.toString();
+	}
+
 	private String parse(ArrayList<String> simbolosDaCadeiaAux) {
 		StringBuffer aux = new StringBuffer();
 		for (String s : simbolosDaCadeiaAux)
@@ -395,6 +413,10 @@ public class AutomatoFinitoEstruturado {
 		}  else if (tipo == -6) { //SAIDA DE SUBMAQUINA
 			System.out.println("Retorno de chamada de submaquina no estado: "+estadoAtual.nome+". Submaquina: "+submaquina);
 			saida.append("Retorno de chamada de submaquina no estado: "+estadoAtual.nome+". Submaquina: "+submaquina+"\n");	
+			
+		}  else if (tipo == -7) { //FALHA DE SUBMAQUINA
+			System.out.println("A submaquina "+submaquina+" nao aceitou a cadeia em questao");
+			saida.append("A submaquina "+submaquina+" nao aceitou a cadeia em questao\n");	
 			
 		} else {
 			System.out.println("Configuracao atual:");
@@ -453,7 +475,7 @@ public class AutomatoFinitoEstruturado {
 			while(linha != null){
 				saidaIndividual = null;
 				
-				if(this.interpretar(linha,linha,this.submaquinas, null, false, 0) != 0) {
+				if(this.interpretar(linha,linha,this.submaquinas, null, false, 0) > 0) {
 					System.out.println(linha+" VALIDA");
 					System.out.println("----------------------------------------------------------------------------");
 					saida.append(linha+" VALIDA\n----------------------------------------------------------------------------");

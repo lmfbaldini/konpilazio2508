@@ -1,0 +1,8 @@
+aaaa NAO-VALIDA
+
+aabcdabcdaaaaa VALIDA
+
+bbccddaa NAO-VALIDA
+
+abcabacabcdddcc VALIDA
+
