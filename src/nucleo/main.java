@@ -20,7 +20,7 @@ public class main {
 		
 		System.out.println("Fim da leitura");
 		try {
-			automato.interpretar(args[1],automato.submaquinas);
+			automato.processarArquivoDeEntrada(args[1],false);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
