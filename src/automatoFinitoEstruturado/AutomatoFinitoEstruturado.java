@@ -318,9 +318,10 @@ public class AutomatoFinitoEstruturado {
 				}
 				if (retorno == true) {
 					if (simbolosDaCadeiaAux.size() != 0) {
+						retorno = false;
 						continue;
 					} else if (sub == true) {
-						return 0;
+						return contador;
 					} else if (simbolosDaCadeiaAux.size() == 0) {
 						break;
 					}
@@ -341,7 +342,7 @@ public class AutomatoFinitoEstruturado {
 			}
 			return contador;
 		}
-		if (sub == false) {
+		if (sub == false || (estadoAtual.tipo != 3 && estadoAtual.tipo != 1)) {
 			saida.append(imprimeSaida(wOriginal,"",-4,estadoAtual,null, -4, null));
 			saidaIndividual = saida.toString();
 		}
@@ -355,8 +356,8 @@ public class AutomatoFinitoEstruturado {
 		int i = 0;
 		aux.append("Pilha:\n");
 		
-		for (AutomatoFinitoEstruturado a : pilha2.pilhaInterna) {
-			aux.append(i+" :"+a.nome+" - "+pilha2.mapa.get(a).peek().toString()+"\n");
+		for (String a : pilha2.pilhaToString) {
+			aux.append(a+"\n");
 			i++;
 		}
 		
@@ -478,11 +479,11 @@ public class AutomatoFinitoEstruturado {
 				if(this.interpretar(linha,linha,this.submaquinas, null, false, 0) > 0) {
 					System.out.println(linha+" VALIDA");
 					System.out.println("----------------------------------------------------------------------------");
-					saida.append(linha+" VALIDA\n----------------------------------------------------------------------------");
+					saida.append(linha+" VALIDA\n----------------------------------------------------------------------------\n");
 				} else {
 					System.out.println(linha+" NAO-VALIDA");
 					System.out.println("----------------------------------------------------------------------------");
-					saida.append(linha+" NAO-VALIDA\n----------------------------------------------------------------------------");
+					saida.append(linha+" NAO-VALIDA\n----------------------------------------------------------------------------\n");
 				}
 				
 				/*
@@ -517,6 +518,8 @@ public class AutomatoFinitoEstruturado {
 		
 	}
 	
-	
+	public String toString() {
+		return this.nome;
+	}
 	
 }
