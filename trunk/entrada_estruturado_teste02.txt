@@ -1,0 +1,8 @@
+i=n;i=n+(i*(n))
+i=n;i=n/i+n*i
+i++;i=n
+i+n
+=n
+n=n+i
+n=i
+i=n;i=i*n;i=i+n;i=n/i

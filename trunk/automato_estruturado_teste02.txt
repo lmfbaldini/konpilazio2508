@@ -1,0 +1,46 @@
+SUBMAQUINAS
+<P>
+<E>
+---SUB---
+<P>
+ESTADOS
+A 0
+B 2
+C 2
+D 3
+SIMBOLOS
+i
+=
+;
+REGRAS
+A i B
+B = C
+C <E> D
+D ; A
+---SUB---
+<E>
+ESTADOS
+A 0
+B 2
+C 2
+D 3
+SIMBOLOS
+i
+n
+(
+)
++
+-
+*
+/
+REGRAS
+A i D
+A n D
+A ( B
+B <E> C
+C ) D
+D + A
+D - A
+D * A
+D / A
+---EOF---

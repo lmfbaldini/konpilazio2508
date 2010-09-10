@@ -133,10 +133,6 @@ public class AutomatoFinitoEstruturado {
 					}
 					String nome = valores.nextToken();
 					Integer tipo = Integer.parseInt(valores.nextToken());
-					if ((tipo == 0 || tipo == 1) && estadoInicial) 
-						throw a01Exception; // Caso o estado inicial ja esteja setado temos um erro
-					else
-						estadoInicial = true;
 					if (submaquinas.get(0).nome.equals(maquinaAtual)) {
 						estados.add(new Estado(nome, tipo));
 						submaquinas.set(0, this);
@@ -189,6 +185,16 @@ public class AutomatoFinitoEstruturado {
 					for (AutomatoFinitoEstruturado a : submaquinas) {
 						if (a.nome.equals(simboloAux))
 							simbolo = simboloAux;
+					}
+					if (simbolo == null && !submaquinas.get(0).nome.equals(maquinaAtual)) {
+						for (AutomatoFinitoEstruturado a : submaquinas) {
+							if (a.nome.equals(maquinaAtual)) {
+								for (String e : a.simbolos) {
+									if (e.equals(simboloAux))
+										simbolo = simboloAux;
+								}
+							}
+						}
 					}
 					String estadoAux2 = valores.nextToken();
 					Estado estado2 = null;
@@ -298,6 +304,7 @@ public class AutomatoFinitoEstruturado {
 						} else if (ret != 0){
 							estadoAtual = pilha.pop_U(pilha.pop_T());
 							saida.append(imprimeSaida(wOriginal,"",-3,estadoAtual,null, -6, maq.nome));
+							saida.append(imprimePilha(pilha));
 							for(int i = 0; i<ret; i++) {
 								simbolosDaCadeiaAux.remove(0);
 								contador++;
@@ -360,6 +367,8 @@ public class AutomatoFinitoEstruturado {
 			aux.append(a+"\n");
 			i++;
 		}
+		if (pilha.pilhaToString.isEmpty())
+			aux.append("<vazia>\n");
 		
 		System.out.println(aux.toString());
 		
@@ -488,12 +497,12 @@ public class AutomatoFinitoEstruturado {
 				
 				/*
 				 * Imprime saidas individuais para cada cadeia, detalhando a execucao, passo a passo
-				 */
+				 
 				if (verbose) {
 					BufferedWriter out = new BufferedWriter(new FileWriter(arquivoDeOrigem+": "+linha)); 
 					out.write(saidaIndividual); 
 					out.close();
-				}
+				}*/
 				
 				linha = buffer.readLine();
 			}
