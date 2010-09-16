@@ -16,10 +16,6 @@ import java.util.StringTokenizer;
  * q0: Estado identificado como inicial em ArrayList<Estado> estados
  * F: Estados identificados como finais em ArrayList<Estado> estados
  * 
- * Este automato pode resolver nao determinismos atravez de um mecanismo que ira trilhar todos os caminhos possiveis
- * gerados pelos nao determinismos (evitando loops). Caso encontre um caminho que consuma a cadeia e termine em um estado
- * de aceitacao, ele para e aceita a cadeia. Caso nenhum dos caminhos consuma a cadeia inteira ou termine em um estado de 
- * rejeicao mesmo que consuma a cadeia, o automato rejeitara a cadeia.
  * 
  * 
  * 
@@ -358,6 +354,122 @@ public class AutomatoFinito {
 		}
 		
 	}
+	
+
+	/**
+	 * controi o TRANSDUTOR MEALY considerando o arquivo do tipo 02
+	 * ARQUIVO DO TIPO 02: Cada linha contem uma informacao, 
+	 * a palavra ESTADOS inidica que as proximas linha serao estados (cada estado tera um nome e um tipo, separados por um espaco,
+	 * o tipo de um estado vale 0 p/ estado INICIAL NAO-FINAL, 1 para estado de INICIAL FINAL, 2 para estado de NAO-FINAL
+	 * e 3 para FINAL), 
+	 * a palavra SIMBOLOS indica que as proximas linhas serao simbolos
+	 * e por fim a palavra REGRAS indica que as proximas linhas serao regras (um nome de estado, um simbolo e um outro
+	 * nome de estado, separados por espacos). Estas regras preveem a emissao de tokens em certas transicoes
+	 * O SIMBOLO ESPECIAL PARA "OUTROS" SIMBOLOS EH (*) (asteristico envolvido por dois parenteses)
+	 * O SIMBOLO ESPECIAL PARA TRANSICOES EM VAZIO EH (@)
+	 * 
+	 * @return AF
+	 * @throws Exception 
+	 */
+	public void construirTransdutor(String arquivo) throws Exception {
+		this.arquivoDeOrigem = arquivo;
+		String ref = null;
+		String linha = null;
+		
+		try {
+			FileReader file = new FileReader(arquivo); // read a file
+			BufferedReader buffer = new BufferedReader(file);
+			StringTokenizer valores;
+			boolean estadoInicial = false; /* booleano para verificar se o estado inicial está preenchido */
+			Exception leituraException = new Exception("Erro lendo arquivo, formato inválido");
+			Exception a01Exception = new Exception("O automato contem mais de um estado inicial");
+
+			
+			linha = buffer.readLine();	/* Le  a primeira linha */
+			while(linha != null){
+				if (linha.equals("ESTADOS") || linha.equals("SIMBOLOS") || linha.equals("REGRAS")) {
+					ref = linha;
+					linha = buffer.readLine();
+					continue;
+				}
+				
+				if (ref.equals("ESTADOS")) {
+					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por ' ',\n,\t,\r ou \f */
+					if (valores.countTokens() != 2) {
+						throw leituraException;
+					}
+					String nome = valores.nextToken();
+					Integer tipo = Integer.parseInt(valores.nextToken());
+					if ((tipo == 0 || tipo == 1) && estadoInicial) 
+						throw a01Exception; // Caso o estado inicial ja esteja setado temos um erro
+					else
+						estadoInicial = true;
+					estados.add(new Estado(nome, tipo));
+					
+				} else if (ref.equals("SIMBOLOS")) {
+					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
+					if (valores.countTokens() != 1) {
+						throw leituraException;
+					}
+					simbolos.add(valores.nextToken());
+					
+				} else if (ref.equals("REGRAS")) {
+					valores = new StringTokenizer(linha); /* separa a String linha em valores separados por \n,\t,\r ou \f */
+					if (valores.countTokens() != 3) {
+						throw leituraException;
+					}
+					String estadoAux1 = valores.nextToken();
+					Estado estado1 = null;
+					for (Estado e : estados) {
+						if (e.nome.equals(estadoAux1))
+							estado1 = new Estado(e);
+					}
+					String simboloAux = valores.nextToken();
+					String simbolo = null;
+					for (String e : simbolos) {
+						if (e.equals(simboloAux))
+							simbolo = e;
+					}
+					if (simboloAux.equals("(*)"))
+						simbolo = simboloAux;
+					if (simboloAux.equals("(@)"))
+						simbolo = simboloAux;
+					String estadoAux2 = valores.nextToken();
+					Estado estado2 = null;
+					for (Estado e : estados) {
+						if (e.nome.equals(estadoAux2))
+							estado2 = new Estado(e);
+					}
+					if (estado1 != null & simbolo != null & estado2 != null)
+						regras.put(estado1, simbolo, estado2);
+					else
+						throw a01Exception;
+					
+				} else {
+					throw leituraException;
+				}
+				
+				
+				
+				linha = buffer.readLine();
+			}
+			
+			buffer.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Arquivo nao encontrado. Coloque-o na mesma pasta do programa.");
+			e.printStackTrace();
+			System.exit(1);
+		} catch (IOException e) {
+			System.out.println("Nao foi possivel ler do arquivo.");
+			e.printStackTrace();
+			System.exit(1);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(1);
+		}
+		
+	}
+	
 	
 	/**
 	 * processa um arquivo que contem a cada linha uma cadeia para ser interpretada pelo automato.
