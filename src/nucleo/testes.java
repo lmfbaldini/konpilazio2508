@@ -38,16 +38,17 @@ public class testes {
 	            int totalMaq = listaMaquinas.getLength();
 	            System.out.println("Total de maquinas : " + totalMaq);
 
+	            //-------Inicia iteracao sobre as maquinas
 	            for(int s=0; s<listaMaquinas.getLength() ; s++){
 
-
+	            	//-------Pega maquina s
 	                Node maquina = listaMaquinas.item(s);
 	                if(maquina.getNodeType() == Node.ELEMENT_NODE){
 
 
 	                    Element elementoMaquina = (Element)maquina;
 
-	                    //-------Atributo de nome
+	                    //-------Atributo de nome da maquina
 	                    NodeList nomeMaq = elementoMaquina.getElementsByTagName("name");
 	                    Element elementoNomeMaq = (Element)nomeMaq.item(0);
 
