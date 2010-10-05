@@ -61,7 +61,7 @@ public class Regra {
 	}
 	
 	public String toString() {
-		return (simbolo!=null)? estadoInicial.toString()+"--"+simbolo.toString()+"-->"+estadoFinal.toString(): estadoInicial.toString()+"=="+submaquina+"==>"+estadoFinal.toString();
+		return (simbolo!=null)? estadoInicial.toString()+"-- "+simbolo.toString()+" -->"+estadoFinal.toString(): estadoInicial.toString()+"=="+submaquina+"==>"+estadoFinal.toString();
 	}
 	
 	
