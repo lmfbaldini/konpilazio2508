@@ -18,6 +18,7 @@ public class AutomatoFinitoEstruturado_v2 {
 	Estadov2 estadoAtual = null;
 	Regra regraAtual = null;
 	
+	
 	public AutomatoFinitoEstruturado_v2() {
 		this.clear();
 		
@@ -109,6 +110,13 @@ public class AutomatoFinitoEstruturado_v2 {
 		
 		
 		return null;
+		
+	}
+	
+	public int executaRegra(Regra r) {
+		
+		
+		return 0;
 		
 	}
 	
