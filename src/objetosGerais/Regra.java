@@ -7,10 +7,27 @@ public class Regra {
 	Estadov2 estadoInicial = null;
 	Estadov2 estadoFinal = null;
 	Simbolo simbolo = null;
-	AutomatoFinito_v2 automatoFinito = null;
-	AutomatoFinitoEstruturado_v2 automatoEstruturado = null;
 	String retorno = null;
+	String submaquina = null;
 	
+	public Regra(Estadov2 estado, Estadov2 estado2, Simbolo simbolo2,
+			String textContent) {
+		this.estadoInicial = estado;
+		this.estadoFinal = estado2;
+		this.simbolo = simbolo2;
+		this.retorno = textContent;
+		
+	}
+	
+	public Regra(Estadov2 estado, Estadov2 estado2, String submaquina,
+			String textContent) {
+		this.estadoInicial = estado;
+		this.estadoFinal = estado2;
+		this.submaquina = submaquina;
+		this.retorno = textContent;
+		
+	}
+
 	public Estadov2 getEstadoInicial() {
 		return estadoInicial;
 	}
@@ -35,29 +52,16 @@ public class Regra {
 		this.simbolo = simbolo;
 	}
 	
-	public AutomatoFinito_v2 getAutomatoFinito() {
-		return automatoFinito;
-	}
-	
-	public void setAutomatoFinito(AutomatoFinito_v2 automatoFinito) {
-		this.automatoFinito = automatoFinito;
-	}
-	
-	public AutomatoFinitoEstruturado_v2 getAutomatoEstruturado() {
-		return automatoEstruturado;
-	}
-	
-	public void setAutomatoEstruturado(
-			AutomatoFinitoEstruturado_v2 automatoEstruturado) {
-		this.automatoEstruturado = automatoEstruturado;
-	}
-	
 	public String getRetorno() {
 		return retorno;
 	}
 	
 	public void setRetorno(String retorno) {
 		this.retorno = retorno;
+	}
+	
+	public String toString() {
+		return (simbolo!=null)? estadoInicial.toString()+"--"+simbolo.toString()+"-->"+estadoFinal.toString(): estadoInicial.toString()+"=="+submaquina+"==>"+estadoFinal.toString();
 	}
 	
 	
