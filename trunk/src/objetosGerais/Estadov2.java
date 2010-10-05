@@ -13,8 +13,11 @@ public class Estadov2 {
 	String retorno = null;
 	ArrayList<Regra> regras = new ArrayList<Regra>();
 	
-	public Estadov2() {
+	public Estadov2(String nome, int tipo, String retorno) {
 		this.regras.clear();
+		this.nome = nome;
+		this.tipo = tipo;
+		this.retorno = retorno;
 		
 	}
 	
@@ -110,6 +113,10 @@ public class Estadov2 {
 		if (tipo != other.tipo)
 			return false;
 		return true;
+	}
+	
+	public String toString() {
+		return (retorno==null)? nome+"("+tipo+")" : nome+"("+tipo+", "+retorno+")" ;
 	}
 	
 	

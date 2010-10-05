@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <AF>
-	<tipo>0</tipo>
+	<tipo>1</tipo>
 	<maquina>
-		<name>maquina1</name>
+		<name>S</name>
 		<estado>
 			<name>A</name>
 			<inicial>1</inicial>
@@ -11,76 +11,106 @@
 			<name>B</name>
 		</estado>
 		<estado>
-			<name>D</name>
-			<moore>helloMoore</moore>
+			<name>C</name>
 		</estado>
 		<estado>
-			<name>C</name>
+			<name>D</name>
 			<final>1</final>
 		</estado>
+		<estado>
+			<name>E</name>
+		</estado>
+		<estado>
+			<name>F</name>
+		</estado>
+		<estado>
+			<name>G</name>
+		</estado>
+		<estado>
+			<name>H</name>
+		</estado>
 		<simbolo>a</simbolo>
-		<simbolo>b</simbolo>
-		<simbolo>c</simbolo>
+		<simbolo>,</simbolo>
+		<simbolo>(</simbolo>
+		<simbolo>)</simbolo>
+		<simbolo>[</simbolo>
+		<simbolo>]</simbolo>
+		<simbolo>{</simbolo>
+		<simbolo>}</simbolo>
 		<regra>
-			<de>C</de>
+			<de>A</de>
 			<acao>
 				<consome>a</consome>
 			</acao>
-			<para>A</para>
+			<para>D</para>
 		</regra>
 		<regra>
 			<de>A</de>
 			<acao>
-				<consome>c</consome>
+				<consome>(</consome>
 			</acao>
 			<para>B</para>
-		</regra>
-		<regra>
-			<de>B</de>
-			<acao>
-				<chama>maquina1</chama>
-			</acao>
-			<para>A</para>
-		</regra>
-	</maquina>
-	<maquina>
-		<name>maquina2</name>
-		<estado>
-			<name>A</name>
-			<inicial>1</inicial>
-		</estado>
-		<estado>
-			<name>B</name>
-		</estado>
-		<estado>
-			<name>D</name>
-			<moore>helloMoore</moore>
-		</estado>
-		<estado>
-			<name>C</name>
-			<final>1</final>
-		</estado>
-		<simbolo>a</simbolo>
-		<simbolo>b</simbolo>
-		<simbolo>c</simbolo>
-		<regra>
-			<de>C</de>
-			<acao>
-				<consome>a</consome>
-			</acao>
-			<para>A</para>
 		</regra>
 		<regra>
 			<de>A</de>
 			<acao>
-				<consome>c</consome>
+				<consome>[</consome>
 			</acao>
-			<para>B</para>
+			<para>E</para>
+		</regra>
+		<regra>
+			<de>A</de>
+			<acao>
+				<consome>{</consome>
+			</acao>
+			<para>G</para>
 		</regra>
 		<regra>
 			<de>B</de>
 			<acao>
-				<chama>maquina1</chama>
+				<chama>S</chama>
+			</acao>
+			<para>C</para>
+		</regra>
+		<regra>
+			<de>E</de>
+			<acao>
+				<chama>S</chama>
+			</acao>
+			<para>F</para>
+		</regra>
+		<regra>
+			<de>G</de>
+			<acao>
+				<chama>S</chama>
+			</acao>
+			<para>H</para>
+		</regra>
+		<regra>
+			<de>C</de>
+			<acao>
+				<consome>)</consome>
+			</acao>
+			<para>D</para>
+		</regra>
+		<regra>
+			<de>F</de>
+			<acao>
+				<consome>]</consome>
+			</acao>
+			<para>D</para>
+		</regra>
+		<regra>
+			<de>H</de>
+			<acao>
+				<consome>}</consome>
+			</acao>
+			<para>D</para>
+		</regra>
+		<regra>
+			<de>D</de>
+			<acao>
+				<consome>,</consome>
 			</acao>
 			<para>A</para>
 		</regra>
