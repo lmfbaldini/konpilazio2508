@@ -1,7 +1,10 @@
 package automatoFinitoEstruturado;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 
+import objetosGerais.EntradaAutomato;
 import objetosGerais.ProcessadorDeEntrada;
 
 public class ControladorEstruturado {
@@ -26,18 +29,36 @@ public class ControladorEstruturado {
 		
 	}
 	
-	public void processaCadeiaClassica(String cadeia) {
+	public void processaCadeiaClassica(EntradaAutomato cadeia) {
 		
 		
 	}
 	
-	/**Cada simbolo é atômico para o automato, as cadeias nao fogem ao escopo do automato de pilha
-	 * cada linha contêm uma cadeia para o automato
+	/**Cada simbolo atomico para o automato, as cadeias nao fogem ao escopo do automato de pilha
+	 * cada linha contem uma cadeia para o automato
 	 * 
 	 * @param entrada
 	 */
 	public void processaEntradaClassica(String entrada) {
 		this.arquivoDeEntrada = entrada;
+		String linha = null;
+		try {
+			FileReader file = new FileReader(entrada);
+			BufferedReader buffer = new BufferedReader(file);
+			
+			System.out.println("Inciando processamento do arquivo: "+entrada);
+			
+			linha = buffer.readLine();
+			while(linha != null){
+				
+				this.processaCadeiaClassica(new EntradaAutomato(linha));
+				
+				linha = buffer.readLine();
+			}
+			buffer.close();
+		} catch (Exception e) {
+			
+		}
 		
 		
 		
