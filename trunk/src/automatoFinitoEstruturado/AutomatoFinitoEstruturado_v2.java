@@ -107,9 +107,7 @@ public class AutomatoFinitoEstruturado_v2 {
 	}
 	
 	public Regra buscaRegra(Estadov2 e, Simbolo s) {
-		
-		
-		return null;
+		return regras.getRegra(e, s);
 		
 	}
 	
