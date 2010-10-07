@@ -4,6 +4,7 @@ import objetosGerais.ConjuntoDeEstados;
 import objetosGerais.ConjuntoDeMaquinas;
 import objetosGerais.ConjuntoDeRegras;
 import objetosGerais.ConjuntoDeSimbolos;
+import objetosGerais.EntradaAutomato;
 import objetosGerais.Estadov2;
 import objetosGerais.Regra;
 import objetosGerais.Simbolo;
@@ -16,7 +17,7 @@ public class AutomatoFinitoEstruturado_v2 {
 	public ConjuntoDeMaquinas submaquinas = new ConjuntoDeMaquinas();
 	
 	Estadov2 estadoAtual = null;
-	Regra regraAtual = null;
+	Regra ultimaRegra = null;
 	
 	
 	public AutomatoFinitoEstruturado_v2() {
@@ -36,7 +37,7 @@ public class AutomatoFinitoEstruturado_v2 {
 		regras.clear();
 		submaquinas.clear();
 		estadoAtual = null;
-		regraAtual = null;
+		ultimaRegra = null;
 		nome = null;
 		
 	}
@@ -83,14 +84,14 @@ public class AutomatoFinitoEstruturado_v2 {
 	 * @return the regraAtual
 	 */
 	public Regra getRegraAtual() {
-		return regraAtual;
+		return ultimaRegra;
 	}
 
 	/**
 	 * @param regraAtual the regraAtual to set
 	 */
 	public void setRegraAtual(Regra regraAtual) {
-		this.regraAtual = regraAtual;
+		this.ultimaRegra = regraAtual;
 	}
 	
 	public String toString() {
@@ -111,10 +112,40 @@ public class AutomatoFinitoEstruturado_v2 {
 		
 	}
 	
-	public int executaRegra(Regra r) {
+	public boolean executaRegra(Regra r, EntradaAutomato cadeia) {
+		if (r.chamada() && submaquinas.getMaquina(r.getSubmaquina()) != null) {
+			this.estadoAtual = r.getEstadoFinal();
+			this.ultimaRegra = r;
+			
+			return submaquinas.getMaquina(r.getSubmaquina()).processaChamadaClassica(cadeia);
+			
+		} else if (r.getSimbolo() != null) {
+			cadeia.consomeSimbolo();
+			this.estadoAtual = r.getEstadoFinal();
+			this.ultimaRegra = r;
+			return true;
+			
+		} else  if (r.vazio()) {
+			this.estadoAtual = r.getEstadoFinal();
+			this.ultimaRegra = r;
+			return true;
+			
+		}
+		
+		return false;
+		
+	}
+	
+	
+	public void processaCadeiaClassica(EntradaAutomato cadeia) {
 		
 		
-		return 0;
+	}
+	
+	public boolean processaChamadaClassica(EntradaAutomato cadeia) {
+		
+		
+		return false;
 		
 	}
 	
