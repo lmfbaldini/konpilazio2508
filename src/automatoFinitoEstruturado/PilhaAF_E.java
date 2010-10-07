@@ -1,9 +1,6 @@
 package automatoFinitoEstruturado;
 
-import java.util.Hashtable;
 import java.util.Stack;
-
-import automatoFinito.Estado;
 
 public class PilhaAF_E<T, U> {
 	public Stack<T> pilhaMaquina;

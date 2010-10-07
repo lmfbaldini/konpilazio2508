@@ -2,13 +2,10 @@ package automatoFinitoEstruturado;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-
 import objetosGerais.EntradaAutomato;
 import objetosGerais.ProcessadorDeEntrada;
 
 public class ControladorEstruturado {
-	ArrayList<AutomatoFinitoEstruturado_v2> maquinas = new ArrayList<AutomatoFinitoEstruturado_v2>();
 	AutomatoFinitoEstruturado_v2 automatoPrincipal = new AutomatoFinitoEstruturado_v2();
 	
 	String arquivoDeEntrada = null;
@@ -20,19 +17,14 @@ public class ControladorEstruturado {
 		this.arquivoDeDefinicao = definicao;
 		this.automatoPrincipal.copia(ProcessadorDeEntrada.constroiAFv2(definicao));
 		
-		maquinas.clear();
-		maquinas.add(automatoPrincipal);
-		for (AutomatoFinitoEstruturado_v2 a : automatoPrincipal.submaquinas.getAll()) {
-			maquinas.add(a);
-			
-		}
+	}
+	
+	public ControladorEstruturado(AutomatoFinitoEstruturado_v2 automato) {
+		this.arquivoDeDefinicao = null;
+		this.automatoPrincipal.copia(automato);
 		
 	}
 	
-	public void processaCadeiaClassica(EntradaAutomato cadeia) {
-		
-		
-	}
 	
 	/**Cada simbolo atomico para o automato, as cadeias nao fogem ao escopo do automato de pilha
 	 * cada linha contem uma cadeia para o automato
@@ -50,8 +42,10 @@ public class ControladorEstruturado {
 			
 			linha = buffer.readLine();
 			while(linha != null){
+				EntradaAutomato in = new EntradaAutomato(linha);
+				in.entradaClassica();
 				
-				this.processaCadeiaClassica(new EntradaAutomato(linha));
+				automatoPrincipal.processaCadeiaClassica(in);
 				
 				linha = buffer.readLine();
 			}

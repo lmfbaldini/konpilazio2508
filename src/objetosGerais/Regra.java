@@ -60,8 +60,33 @@ public class Regra {
 		this.retorno = retorno;
 	}
 	
+	public String getSubmaquina() {
+		return submaquina;
+	}
+
+	public void setSubmaquina(String submaquina) {
+		this.submaquina = submaquina;
+	}
+
 	public String toString() {
 		return (simbolo!=null)? estadoInicial.toString()+"-- "+simbolo.toString()+" -->"+estadoFinal.toString(): estadoInicial.toString()+"=="+submaquina+"==>"+estadoFinal.toString();
+	}
+	
+	public boolean chamada() {
+		if (this.submaquina != null) {
+			return true;
+		}
+		else
+			return false;
+		
+	}
+
+	public boolean vazio() {
+		if (this.simbolo == null && this.submaquina == null) {
+			return true;
+		}
+		else
+			return false;
 	}
 	
 	
