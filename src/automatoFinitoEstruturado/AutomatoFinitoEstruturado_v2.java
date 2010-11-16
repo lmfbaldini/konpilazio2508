@@ -18,6 +18,9 @@ public class AutomatoFinitoEstruturado_v2 {
 	
 	Estadov2 estadoAtual = null;
 	Regra ultimaRegra = null;
+	AutomatoFinitoEstruturado_v2 submaquinaEmExecucao = null;
+	
+	boolean debug = true;
 	
 	
 	public AutomatoFinitoEstruturado_v2() {
@@ -39,6 +42,7 @@ public class AutomatoFinitoEstruturado_v2 {
 		estadoAtual = null;
 		ultimaRegra = null;
 		nome = null;
+		this.submaquinaEmExecucao = null;
 		
 	}
 	
@@ -113,24 +117,65 @@ public class AutomatoFinitoEstruturado_v2 {
 	}
 	
 	public boolean executaRegra(Regra r, EntradaAutomato cadeia) {
-		if (r.chamada() && submaquinas.getMaquina(r.getSubmaquina()) != null) {
-			this.estadoAtual = r.getEstadoFinal();
-			this.ultimaRegra = r;
+		if (r == null) {
+			if (debug) System.out.println("Sem simbolo compativel: "+estadoAtual.toString()+" "+cadeia.espiaSimbolo());
+			return false;
 			
-			return submaquinas.getMaquina(r.getSubmaquina()).processaChamadaClassica(cadeia);
+		}
+		if (r.chamada()) {
+			if ((submaquinas.getMaquina(r.getSubmaquina()) != null)) {
+				if (debug) System.out.println("Iniciando chamada de submaquina\nRegra aplicada: "+r.toString());
+				this.submaquinaEmExecucao = submaquinas.getMaquina(r.getSubmaquina());
+				boolean resultado = this.submaquinaEmExecucao.processaChamadaClassica(cadeia);	
+				if (debug) System.out.println("Fim da chamada de submaquina ("+resultado+")");
+				if (resultado) {
+					this.estadoAtual = r.getEstadoFinal();
+					this.ultimaRegra = r;
+				}
+				
+				return resultado;
+			} else if (r.getSubmaquina().equals(this.nome)) {
+				if (debug) System.out.println("Iniciando chamada de submaquina propria\nRegra aplicada: "+r.toString());				
+				this.submaquinaEmExecucao = new AutomatoFinitoEstruturado_v2();
+				this.submaquinaEmExecucao.copia(this);
+				
+				boolean resultado = this.submaquinaEmExecucao.processaChamadaClassica(cadeia);	
+				if (debug) System.out.println("Fim da chamada de submaquina ("+resultado+")");
+				if (resultado) {
+					this.estadoAtual = r.getEstadoFinal();
+					this.ultimaRegra = r;
+				}
+				
+				return resultado;
+				
+			}
 			
 		} else if (r.getSimbolo() != null) {
-			cadeia.consomeSimbolo();
-			this.estadoAtual = r.getEstadoFinal();
-			this.ultimaRegra = r;
-			return true;
+			if (r.getSimbolo().equals(cadeia.espiaSimbolo())) {
+				Simbolo s = cadeia.consomeSimbolo();
+				this.estadoAtual = r.getEstadoFinal();
+				this.ultimaRegra = r;
+				
+				if (debug) System.out.println("Simbolo consumido: "+s.toString()+"\nRegra aplicada: "+r.toString());
+				return true;
+				
+			} else {
+				if (debug) System.out.println("Sem simbolo compativel: "+estadoAtual.toString()+" "+cadeia.espiaSimbolo());
+				return false;
+				
+			}
 			
 		} else  if (r.vazio()) {
 			this.estadoAtual = r.getEstadoFinal();
 			this.ultimaRegra = r;
+			
+			if (debug) System.out.println("Transicao em vazio\nRegra aplicada: "+r.toString());
+			
 			return true;
 			
 		}
+		
+		if (debug) System.out.println("Nenhuma regra encontrada\n"+estadoAtual.toString()+ultimaRegra.toString()+"\n"+this.toString());
 		
 		return false;
 		
@@ -138,12 +183,52 @@ public class AutomatoFinitoEstruturado_v2 {
 	
 	
 	public void processaCadeiaClassica(EntradaAutomato cadeia) {
+		this.inicia();
+		if (debug) System.out.println(cadeia.toStringClassica());
 		
+		while (!cadeia.vazia()) {
+			if (!(this.executaRegra(buscaRegra(estadoAtual, cadeia.espiaSimbolo()), cadeia))) {
+				//erro
+				System.out.println("Erro");
+				break;
+			} else {
+				//tudo ok
+			}
+			if (debug) System.out.println("cadeia: "+cadeia.toStringClassica());
+			if (debug) System.out.println("estado: "+estadoAtual.toString());
+			
+		}
+		
+		if (cadeia.vazia() && estadoAtual.getTipo() == 1) {
+			System.out.println("cadeia: "+cadeia.entrada+" ACEITA");
+		} else {
+			System.out.println("cadeia: "+cadeia.entrada+" REJEITADA");
+		}
 		
 	}
 	
 	public boolean processaChamadaClassica(EntradaAutomato cadeia) {
+		this.inicia();
+		if (debug) System.out.println("Iniciando processamento em submaquina");
 		
+		while (!cadeia.vazia()) {
+			if (this.estadoAtual.getTipo() == 1) {
+				if (this.buscaRegra(estadoAtual, cadeia.espiaSimbolo()) == null) {
+					return true;
+				}
+			}
+			if (!(this.executaRegra(buscaRegra(estadoAtual, cadeia.espiaSimbolo()), cadeia))) {
+				//erro
+				System.out.println("Erro");
+				break;
+			} else {
+				//tudo ok
+			}
+			
+			if (debug) System.out.println("cadeia em sub: "+cadeia.toStringClassica());
+			if (debug) System.out.println("estado em sub: "+estadoAtual.toString());
+			
+		}
 		
 		return false;
 		

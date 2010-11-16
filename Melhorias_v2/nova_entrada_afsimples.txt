@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<AF>
+	<tipo>1</tipo>
+	<maquina>
+		<name>S</name>
+		<estado>
+			<name>A</name>
+			<inicial>1</inicial>
+		</estado>
+		<estado>
+			<name>B</name>
+			<final>1</final>
+		</estado>
+		<simbolo>a</simbolo>
+		<simbolo>,</simbolo>
+		<regra>
+			<de>A</de>
+			<acao>
+				<consome>a</consome>
+			</acao>
+			<para>B</para>
+		</regra>
+		<regra>
+			<de>B</de>
+			<acao>
+				<consome>,</consome>
+			</acao>
+			<para>A</para>
+		</regra>
+	</maquina>
+</AF>

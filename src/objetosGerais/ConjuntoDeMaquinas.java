@@ -19,9 +19,9 @@ public class ConjuntoDeMaquinas {
 		
 	}
 
-	public AutomatoFinitoEstruturado_v2 getMaquina(String textContent) {
+	public AutomatoFinitoEstruturado_v2 getMaquina(String nome) {
 		for (AutomatoFinitoEstruturado_v2 afe : AFs) {
-			if (afe.getNome().equals(textContent))
+			if (afe.getNome().equals(nome))
 				return afe;
 		}
 		

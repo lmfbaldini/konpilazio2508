@@ -1,7 +1,9 @@
 package nucleo;
 
+import objetosGerais.EntradaAutomato;
 import objetosGerais.ProcessadorDeEntrada;
 import automatoFinito.AutomatoFinito;
+import automatoFinito.AutomatoFinito_v2;
 import automatoFinitoEstruturado.AutomatoFinitoEstruturado;
 import automatoFinitoEstruturado.AutomatoFinitoEstruturado_v2;
 
@@ -11,26 +13,29 @@ public class main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		AutomatoFinitoEstruturado_v2 automato = new AutomatoFinitoEstruturado_v2();
+		AutomatoFinito_v2 automato = new AutomatoFinito_v2();
 		
 		try {
-			automato.copia(ProcessadorDeEntrada.constroiAFv2(args[0]));
+			automato.copia(ProcessadorDeEntrada.constroiAFv2simples(args[0]));
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
 		}
 		
 		System.out.println(automato.toString());
-	/*	
+		
 		System.out.println("Fim da leitura");
 		try {
-			automato.processarArquivoDeEntrada(args[1],true);
+			EntradaAutomato in = new EntradaAutomato("a,a,a,aa");
+			in.entradaClassica();
+			automato.processaCadeiaClassica(in);
+			
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 			System.exit(1);
 		}
 
-		System.out.println("Fim da execucao");*/
+		System.out.println("Fim da execucao");
 		
 	}
 
