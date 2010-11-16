@@ -38,5 +38,10 @@ public class EntradaAutomato {
 		return simbolos.isEmpty();
 		
 	}
+
+	public String toStringClassica() {
+		String cadeiaAtual = null;
+		return simbolos.toString();
+	}
 	
 }

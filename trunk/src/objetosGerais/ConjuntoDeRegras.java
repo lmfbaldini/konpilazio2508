@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 public class ConjuntoDeRegras {
 	ArrayList<Regra> regras = new ArrayList<Regra>();
-
+	boolean debug = true;
+	
 	public ConjuntoDeRegras() {
 		this.regras.clear();
 		
@@ -32,7 +33,21 @@ public class ConjuntoDeRegras {
 	
 	public Regra getRegra(Estadov2 e, Simbolo s) {
 		for (Regra r : regras) {
-			if (r.estadoInicial.equals(e) && r.simbolo.equals(s))
+			if (r.estadoInicial.equals(e)) {
+				if (r.simbolo != null) {
+					if (r.simbolo.equals(s)) {
+						return r;
+					}
+				}
+			}
+		}
+		for (Regra r : regras) {
+			if (r.estadoInicial.equals(e) && r.chamada()) {
+				return r;
+			}
+		}
+		for (Regra r : regras) {
+			if (r.estadoInicial.equals(e) && r.vazio())
 				return r;
 		}
 		return null;
