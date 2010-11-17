@@ -1,23 +1,32 @@
-ESTADOS
-A 0
-B 2
-C 2
-D 2
-E 2
-F 2
-G 2
-SIMBOLOS
-T
-I
-<
->
-N
-,
-REGRAS
-A T B
-B I E
-C > F
-D (*) B
-E < B
-E (*) B
-F N C
+<?xml version="1.0"?>
+<AF>
+	<tipo>1</tipo>
+	<maquina>
+		<name>S</name>
+		<estado>
+			<name>A</name>
+			<inicial>1</inicial>
+		</estado>
+		<estado>
+			<name>B</name>
+			<final>1</final>
+		</estado>
+		<simbolo>a</simbolo>
+		<simbolo>,</simbolo>
+		<regra>
+			<de>A</de>
+			<acao>
+				<consome>a</consome>
+			</acao>
+			<para>B</para>
+		</regra>
+		<regra>
+			<de>B</de>
+			<acao>
+				<consome>,</consome>
+			</acao>
+			<para>A</para>
+			<mealey>identificador</mealey>
+		</regra>
+	</maquina>
+</AF>

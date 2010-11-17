@@ -1,10 +1,12 @@
 package objetosGerais;
 
 import java.util.Stack;
+import java.util.ArrayList;
 
 public class EntradaAutomato {
 	public String entrada = null;
 	public Stack<Simbolo> simbolos = new Stack<Simbolo>();
+	public ArrayList<Simbolo> buffer = new ArrayList<Simbolo>();
 	
 	public EntradaAutomato(String s) {
 		this.entrada = s;
@@ -24,6 +26,12 @@ public class EntradaAutomato {
 	}
 	
 	public Simbolo consomeSimbolo() {
+		return simbolos.pop();
+		
+	}
+	
+	public Simbolo bufferizaSimbolo() {
+		buffer.add(simbolos.peek());
 		return simbolos.pop();
 		
 	}
