@@ -2,7 +2,6 @@ package automatoFinito;
 
 
 import analisadorLexico.AnalisadorLexico;
-import analisadorLexico.Token;
 import objetosGerais.*;
 
 public class AutomatoFinito_v2 {

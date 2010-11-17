@@ -1,5 +1,6 @@
 package analisadorLexico;
 
+import objetosGerais.Token;
 import automatoFinito.AutomatoFinito;
 
 public class AnalisadorLexico {
@@ -17,7 +18,6 @@ public class AnalisadorLexico {
 		this.palavrasReservadas = palavrasReservadas;
 		
 	}
-	
 	
 	public static Token constroiToken(String parsed) {
 		
