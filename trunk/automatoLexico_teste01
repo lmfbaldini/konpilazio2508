@@ -26,7 +26,7 @@
 				<consome>,</consome>
 			</acao>
 			<para>A</para>
-			<mealey>identificador</mealey>
+			<mealey>id</mealey>
 		</regra>
 	</maquina>
 </AF>

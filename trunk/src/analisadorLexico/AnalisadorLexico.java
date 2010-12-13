@@ -17,6 +17,13 @@ public class AnalisadorLexico {
 		this.arquivoDeEntrada = arquivoDeEntrada;
 		this.palavrasReservadas = palavrasReservadas;
 		
+		/* TODO 
+		 * 
+		 * Gerar tabela de palavras reservadas
+		 * inicializar tabela de simbolos e tokens
+		 *  
+		 * 
+		 * */
 	}
 	
 	public static Token constroiToken(String parsed) {
@@ -24,6 +31,7 @@ public class AnalisadorLexico {
 		
 		return null;
 	}
+	
 	
 	
 	
